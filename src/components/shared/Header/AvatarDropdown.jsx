@@ -9,6 +9,7 @@ const AvatarDropdown = () => {
     const router = useRouter();
     const [isOpen, setIsOpen] = useState(false);
     const [user, setUser] = useState(null);
+    const [isAdmin, setIsAdmin] = useState(false);
     const dropdownRef = useRef(null);
 
     // Get user data from localStorage
@@ -19,6 +20,15 @@ const AvatarDropdown = () => {
                 if (userStr) {
                     const userData = JSON.parse(userStr);
                     setUser(userData);
+                    
+                    // Check if user has admin role
+                    // Adjust this based on your role field structure
+                    const adminRole = userData.role === 'admin' || 
+                                    userData.role === 'Administrator' || 
+                                    userData.isAdmin === true ||
+                                    userData.userType === 'admin';
+                    
+                    setIsAdmin(adminRole);
                 }
             } catch (error) {
                 console.error('Error getting user data:', error);
@@ -109,11 +119,24 @@ const AvatarDropdown = () => {
         }
     };
 
-    const menuItems = [
-        { name: "Dashboard", href: "/dashboard", icon: "📊" },
-        { name: "Profile", href: "/profile", icon: "👤" },
-        { name: "Settings", href: "/settings", icon: "⚙️" },
-    ];
+    // Dynamic menu items based on user role
+    const getMenuItems = () => {
+        if (isAdmin) {
+            return [
+                { name: "Dashboard", href: "/admin/dashboard", icon: "📊" },
+                { name: "Profile", href: "/profile", icon: "👤" },
+                { name: "Settings", href: "/settings", icon: "🔧" },
+            ];
+        } else {
+            return [
+                { name: "Dashboard", href: "/dashboard", icon: "📊" },
+                { name: "Profile", href: "/profile", icon: "👤" },
+                { name: "Settings", href: "/settings", icon: "⚙️" },
+            ];
+        }
+    };
+
+    const menuItems = getMenuItems();
 
     // Get user display name
     const displayName = user?.name || user?.fullName || user?.username || 'User';
@@ -167,6 +190,13 @@ const AvatarDropdown = () => {
                         <p className="text-xs text-gray-500 truncate">
                             {userEmail}
                         </p>
+                        {isAdmin && (
+                            <div className="mt-1">
+                                <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800">
+                                    Administrator
+                                </span>
+                            </div>
+                        )}
                     </div>
                     
                     {/* Menu Items */}

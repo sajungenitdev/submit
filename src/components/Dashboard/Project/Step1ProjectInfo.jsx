@@ -1,197 +1,207 @@
 "use client";
 
-const projectTypes = [
-    "Film / Video",
-    "Script",
-    "Music / Songwriting",
-    "Photography / Design",
-    "VR / XR / Immersive"
-];
+import { useState } from "react";
 
 export default function Step1ProjectInfo({ formData, updateFormData, onNext }) {
-    const handleChange = (e) => {
-        const { name, value, type } = e.target;
-        const checked = e.target.checked;
+    const [errors, setErrors] = useState({});
+
+    const validateForm = () => {
+        const newErrors = {};
+        if (!formData.projectType) newErrors.projectType = "Project type is required";
+        if (!formData.projectTitle) newErrors.projectTitle = "Project title is required";
+        if (!formData.briefSynopsis) newErrors.briefSynopsis = "Brief synopsis is required";
+        if (formData.briefSynopsis.length < 50) newErrors.briefSynopsis = "Synopsis must be at least 50 characters";
+        if (formData.briefSynopsis.length > 500) newErrors.briefSynopsis = "Synopsis must not exceed 500 characters";
         
-        if (type === "checkbox") {
-            updateFormData({ [name]: checked });
-        } else {
-            updateFormData({ [name]: value });
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
+
+    const handleNext = () => {
+        if (validateForm()) {
+            onNext();
         }
     };
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        onNext();
-    };
-
     return (
-        <form onSubmit={handleSubmit} className="space-y-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Project Information</h2>
-            
-            {/* Project Type */}
+        <div className="space-y-6">
             <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Project Type <span className="text-red-500">*</span>
-                </label>
-                <select
-                    name="projectType"
-                    required
-                    value={formData.projectType}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2 border text-black border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                >
-                    <option value="">Select project type</option>
-                    {projectTypes.map((type) => (
-                        <option key={type} value={type}>{type}</option>
-                    ))}
-                </select>
+                <h2 className="text-2xl font-bold text-gray-900">Project Information</h2>
+                <p className="text-gray-600 mt-1">Tell us about your project</p>
             </div>
-            
-            {/* Project Title */}
-            <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Project Title (English) <span className="text-red-500">*</span>
-                </label>
-                <input
-                    type="text"
-                    name="projectTitle"
-                    required
-                    value={formData.projectTitle}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2 border text-black border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                    placeholder="The Godfather"
-                />
-            </div>
-            
-            {/* Brief Synopsis */}
-            <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Brief Synopsis (English) <span className="text-red-500">*</span>
-                </label>
-                <textarea
-                    name="briefSynopsis"
-                    required
-                    rows={4}
-                    value={formData.briefSynopsis}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2 border text-black border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-none"
-                    placeholder="Enter a brief synopsis of your project..."
-                />
-            </div>
-            
-            {/* Non-English Title Toggle */}
-            <div className="flex items-center">
-                <input
-                    type="checkbox"
-                    name="hasNonEnglishTitle"
-                    id="hasNonEnglishTitle"
-                    checked={formData.hasNonEnglishTitle}
-                    onChange={handleChange}
-                    className="h-4 w-4 text-[#1EB97A] focus:ring-[#1EB97A] border-gray-300 rounded"
-                />
-                <label htmlFor="hasNonEnglishTitle" className="ml-2 block text-sm text-gray-700">
-                    My Project also has a non-English Title and Synopsis
-                </label>
-            </div>
-            
-            {/* Non-English Fields (Conditional) */}
-            {formData.hasNonEnglishTitle && (
-                <>
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Non-English Title
-                        </label>
-                        <input
-                            type="text"
-                            name="nonEnglishTitle"
-                            value={formData.nonEnglishTitle}
-                            onChange={handleChange}
-                            className="w-full px-4 py-2 border text-black border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Non-English Synopsis
-                        </label>
-                        <textarea
-                            name="nonEnglishSynopsis"
-                            rows={4}
-                            value={formData.nonEnglishSynopsis}
-                            onChange={handleChange}
-                            className="w-full px-4 py-2 border text-black border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none resize-none"
-                        />
-                    </div>
-                </>
-            )}
-            
-            {/* Social Links */}
-            <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Website
-                </label>
-                <input
-                    type="url"
-                    name="website"
-                    value={formData.website}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2 border text-black border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                    placeholder="mycoolfilm.com"
-                />
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+            <div className="space-y-4">
+                {/* Project Type */}
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                        X (Twitter)
+                        Project Type <span className="text-red-500">*</span>
                     </label>
-                    <input
-                        type="url"
-                        name="twitter"
-                        value={formData.twitter}
-                        onChange={handleChange}
-                        className="w-full px-4 py-2 border text-black border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                        placeholder="x.com/MyCoolFilm"
-                    />
+                    <select
+                        value={formData.projectType}
+                        onChange={(e) => updateFormData({ projectType: e.target.value })}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    >
+                        <option value="">Select project type</option>
+                        <option value="short_film">Short Film</option>
+                        <option value="documentary">Documentary</option>
+                        <option value="feature_film">Feature Film</option>
+                        <option value="music_video">Music Video</option>
+                        <option value="commercial">Commercial</option>
+                        <option value="animation">Animation</option>
+                        <option value="web_series">Web Series</option>
+                        <option value="other">Other</option>
+                    </select>
+                    {errors.projectType && (
+                        <p className="text-red-500 text-sm mt-1">{errors.projectType}</p>
+                    )}
                 </div>
+
+                {/* Project Title */}
                 <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Facebook
+                        Project Title <span className="text-red-500">*</span>
                     </label>
                     <input
-                        type="url"
-                        name="facebook"
-                        value={formData.facebook}
-                        onChange={handleChange}
-                        className="w-full px-4 py-2 border text-black border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                        placeholder="facebook.com/MyCoolFilm"
+                        type="text"
+                        value={formData.projectTitle}
+                        onChange={(e) => updateFormData({ projectTitle: e.target.value })}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        placeholder="Enter project title"
                     />
+                    {errors.projectTitle && (
+                        <p className="text-red-500 text-sm mt-1">{errors.projectTitle}</p>
+                    )}
+                </div>
+
+                {/* Brief Synopsis */}
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Brief Synopsis <span className="text-red-500">*</span>
+                    </label>
+                    <textarea
+                        value={formData.briefSynopsis}
+                        onChange={(e) => updateFormData({ briefSynopsis: e.target.value })}
+                        rows={5}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        placeholder="Provide a brief synopsis of your project (50-500 characters)"
+                    />
+                    <div className="flex justify-between mt-1">
+                        <p className="text-xs text-gray-500">
+                            {formData.briefSynopsis.length} / 500 characters
+                        </p>
+                        {errors.briefSynopsis && (
+                            <p className="text-red-500 text-xs">{errors.briefSynopsis}</p>
+                        )}
+                    </div>
+                </div>
+
+                {/* Non-English Title Section */}
+                <div className="flex items-center gap-2">
+                    <input
+                        type="checkbox"
+                        id="hasNonEnglishTitle"
+                        checked={formData.hasNonEnglishTitle}
+                        onChange={(e) => updateFormData({ hasNonEnglishTitle: e.target.checked })}
+                        className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                    />
+                    <label htmlFor="hasNonEnglishTitle" className="text-sm font-medium text-gray-700">
+                        Project has non-English title
+                    </label>
+                </div>
+
+                {formData.hasNonEnglishTitle && (
+                    <div className="space-y-4 pl-6 border-l-2 border-blue-200">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Original Title (Non-English)
+                            </label>
+                            <input
+                                type="text"
+                                value={formData.nonEnglishTitle}
+                                onChange={(e) => updateFormData({ nonEnglishTitle: e.target.value })}
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                placeholder="Enter original title"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Original Synopsis (Non-English)
+                            </label>
+                            <textarea
+                                value={formData.nonEnglishSynopsis}
+                                onChange={(e) => updateFormData({ nonEnglishSynopsis: e.target.value })}
+                                rows={3}
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                placeholder="Enter original synopsis"
+                            />
+                        </div>
+                    </div>
+                )}
+
+                {/* Social Media Links */}
+                <div className="space-y-4">
+                    <h3 className="text-md font-semibold text-gray-900">Social Media Links (Optional)</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Website
+                            </label>
+                            <input
+                                type="url"
+                                value={formData.website}
+                                onChange={(e) => updateFormData({ website: e.target.value })}
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                placeholder="https://"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Twitter
+                            </label>
+                            <input
+                                type="text"
+                                value={formData.twitter}
+                                onChange={(e) => updateFormData({ twitter: e.target.value })}
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                placeholder="@username"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Facebook
+                            </label>
+                            <input
+                                type="url"
+                                value={formData.facebook}
+                                onChange={(e) => updateFormData({ facebook: e.target.value })}
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                placeholder="Facebook URL"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Instagram
+                            </label>
+                            <input
+                                type="text"
+                                value={formData.instagram}
+                                onChange={(e) => updateFormData({ instagram: e.target.value })}
+                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                placeholder="@username"
+                            />
+                        </div>
+                    </div>
                 </div>
             </div>
-            
-            <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Instagram
-                </label>
-                <input
-                    type="url"
-                    name="instagram"
-                    value={formData.instagram}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2 border text-black border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                    placeholder="instagram.com/MyCoolFilm"
-                />
-            </div>
-            
-            {/* Navigation Buttons */}
-            <div className="flex justify-end pt-4">
+
+            <div className="flex justify-end pt-6">
                 <button
-                    type="submit"
-                    className="bg-[#1EB97A] hover:bg-[#189663] text-white px-6 py-2.5 rounded-md font-semibold transition-all"
+                    onClick={handleNext}
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg font-semibold transition"
                 >
                     Next Step →
                 </button>
             </div>
-        </form>
+        </div>
     );
 }

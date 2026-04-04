@@ -1,136 +1,110 @@
 "use client";
 
-const countries = [
-    "Afghanistan", "Albania", "Algeria", "American Samoa", "Andorra", "Angola", "Anguilla",
-    "Antarctica", "Antigua and Barbuda", "Argentina", "Armenia", "Aruba", "Australia", "Austria",
-    "Azerbaijan", "Bahamas", "Bahrain", "Bangladesh", "Barbados", "Belarus", "Belgium", "Belize",
-    "Benin", "Bermuda", "Bhutan", "Bolivia", "Bonaire, Sint Eustatius and Saba",
-    "Bosnia and Herzegovina", "Botswana", "Bouvet Island", "Brazil", "British Indian Ocean Territory",
-    "Brunei Darussalam", "Bulgaria", "Burkina Faso", "Burundi", "Cabo Verde", "Cambodia", "Cameroon",
-    "Canada", "Cayman Islands", "Central African Republic", "Chad", "Chile", "China",
-    "Christmas Island", "Cocos (Keeling) Islands", "Colombia", "Comoros", "Congo",
-    "Congo, The Democratic Republic of the", "Cook Islands", "Costa Rica", "Croatia", "Cuba",
-    "Curaçao", "Cyprus", "Czechia", "Côte d'Ivoire", "Denmark", "Djibouti", "Dominica",
-    "Dominican Republic", "Ecuador", "Egypt", "El Salvador", "Equatorial Guinea", "Eritrea",
-    "Estonia", "Eswatini", "Ethiopia", "Falkland Islands (Malvinas)", "Faroe Islands", "Fiji",
-    "Finland", "France", "French Guiana", "French Polynesia", "French Southern Territories",
-    "Gabon", "Gambia", "Georgia", "Germany", "Ghana", "Gibraltar", "Greece", "Greenland",
-    "Grenada", "Guadeloupe", "Guam", "Guatemala", "Guernsey", "Guinea", "Guinea-Bissau",
-    "Guyana", "Haiti", "Heard Island and McDonald Islands", "Holy See (Vatican City State)",
-    "Honduras", "Hong Kong", "Hungary", "Iceland", "India", "Indonesia", "Iran", "Iraq",
-    "Ireland", "Isle of Man", "Israel", "Italy", "Jamaica", "Japan", "Jersey", "Jordan",
-    "Kazakhstan", "Kenya", "Kiribati", "Kosovo", "Kuwait", "Kyrgyzstan",
-    "Lao People's Democratic Republic", "Latvia", "Lebanon", "Lesotho", "Liberia", "Libya",
-    "Liechtenstein", "Lithuania", "Luxembourg", "Macao", "Madagascar", "Malawi", "Malaysia",
-    "Maldives", "Mali", "Malta", "Marshall Islands", "Martinique", "Mauritania", "Mauritius",
-    "Mayotte", "Mexico", "Micronesia, Federated States of", "Moldova", "Monaco", "Mongolia",
-    "Montenegro", "Montserrat", "Morocco", "Mozambique", "Myanmar", "Namibia", "Nauru", "Nepal",
-    "Netherlands", "New Caledonia", "New Zealand", "Nicaragua", "Niger", "Nigeria", "Niue",
-    "Norfolk Island", "North Korea", "North Macedonia", "Northern Mariana Islands", "Norway",
-    "Oman", "Pakistan", "Palau", "Palestine, State of", "Panama", "Papua New Guinea", "Paraguay",
-    "Peru", "Philippines", "Pitcairn", "Poland", "Portugal", "Puerto Rico", "Qatar", "Romania",
-    "Russian Federation", "Rwanda", "Réunion", "Saint Barthélemy",
-    "Saint Helena, Ascension and Tristan da Cunha", "Saint Kitts and Nevis", "Saint Lucia",
-    "Saint Martin (French part)", "Saint Pierre and Miquelon", "Saint Vincent and the Grenadines",
-    "Samoa", "San Marino", "Sao Tome and Principe", "Saudi Arabia", "Senegal", "Serbia",
-    "Seychelles", "Sierra Leone", "Singapore", "Sint Maarten (Dutch part)", "Slovakia",
-    "Slovenia", "Solomon Islands", "Somalia", "South Africa", "South Georgia and the South Sandwich Islands",
-    "South Korea", "South Sudan", "Spain", "Sri Lanka", "Sudan", "Suriname",
-    "Svalbard and Jan Mayen", "Sweden", "Switzerland", "Syrian Arab Republic", "Taiwan",
-    "Tajikistan", "Tanzania", "Thailand", "Timor-Leste", "Togo", "Tokelau", "Tonga",
-    "Trinidad and Tobago", "Tunisia", "Turkmenistan", "Turks and Caicos Islands", "Tuvalu",
-    "Türkiye", "Uganda", "Ukraine", "United Arab Emirates", "United Kingdom", "United States",
-    "United States Minor Outlying Islands", "Uruguay", "Uzbekistan", "Vanuatu", "Venezuela",
-    "Vietnam", "Virgin Islands, British", "Virgin Islands, U.S.", "Wallis and Futuna",
-    "Western Sahara", "Yemen", "Zambia", "Zimbabwe", "Åland Islands"
-];
+import { useState } from "react";
 
 export default function Step2SubmitterInfo({ formData, updateFormData, onNext, onPrev }) {
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        updateFormData({ [name]: value });
+    const [errors, setErrors] = useState({});
+
+    const validateForm = () => {
+        const newErrors = {};
+        if (!formData.email) newErrors.email = "Email is required";
+        if (formData.email && !/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = "Email is invalid";
+        if (!formData.phone) newErrors.phone = "Phone number is required";
+        if (!formData.address) newErrors.address = "Address is required";
+        if (!formData.city) newErrors.city = "City is required";
+        if (!formData.country) newErrors.country = "Country is required";
+        
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
     };
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        onNext();
+    const handleNext = () => {
+        if (validateForm()) {
+            onNext();
+        }
     };
 
     return (
-        <form onSubmit={handleSubmit} className="space-y-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">Submitter Information</h2>
-            
-            {/* Contact Information */}
+        <div className="space-y-6">
+            <div>
+                <h2 className="text-2xl font-bold text-gray-900">Submitter Information</h2>
+                <p className="text-gray-600 mt-1">Tell us about yourself</p>
+            </div>
+
             <div className="space-y-4">
-                <h3 className="text-lg font-medium text-gray-800">Contact Information</h3>
-                
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Email <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                        type="email"
-                        name="email"
-                        required
-                        value={formData.email}
-                        onChange={handleChange}
-                        className="w-full px-4 py-2 border text-black border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                    />
-                </div>
-                
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Phone
-                    </label>
-                    <input
-                        type="tel"
-                        name="phone"
-                        value={formData.phone}
-                        onChange={handleChange}
-                        className="w-full px-4 py-2 border text-black border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                    />
-                </div>
-                
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Address
-                    </label>
-                    <textarea
-                        name="address"
-                        rows={2}
-                        value={formData.address}
-                        onChange={handleChange}
-                        className="w-full px-4 py-2 border text-black border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                    />
-                </div>
-                
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                            City
+                            Email <span className="text-red-500">*</span>
                         </label>
                         <input
-                            type="text"
-                            name="city"
-                            value={formData.city}
-                            onChange={handleChange}
-                            className="w-full px-4 py-2 border text-black border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                            type="email"
+                            value={formData.email}
+                            onChange={(e) => updateFormData({ email: e.target.value })}
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                            placeholder="you@example.com"
                         />
+                        {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
                     </div>
+
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                            State / Province
+                            Phone <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                            type="tel"
+                            value={formData.phone}
+                            onChange={(e) => updateFormData({ phone: e.target.value })}
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                            placeholder="+1 234 567 8900"
+                        />
+                        {errors.phone && <p className="text-red-500 text-sm mt-1">{errors.phone}</p>}
+                    </div>
+                </div>
+
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Address <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                        type="text"
+                        value={formData.address}
+                        onChange={(e) => updateFormData({ address: e.target.value })}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                        placeholder="Street address"
+                    />
+                    {errors.address && <p className="text-red-500 text-sm mt-1">{errors.address}</p>}
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                            City <span className="text-red-500">*</span>
                         </label>
                         <input
                             type="text"
-                            name="stateProvince"
+                            value={formData.city}
+                            onChange={(e) => updateFormData({ city: e.target.value })}
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                            placeholder="City"
+                        />
+                        {errors.city && <p className="text-red-500 text-sm mt-1">{errors.city}</p>}
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                            State/Province
+                        </label>
+                        <input
+                            type="text"
                             value={formData.stateProvince}
-                            onChange={handleChange}
-                            className="w-full px-4 py-2 border text-black border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                            onChange={(e) => updateFormData({ stateProvince: e.target.value })}
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                            placeholder="State/Province"
                         />
                     </div>
                 </div>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -138,58 +112,49 @@ export default function Step2SubmitterInfo({ formData, updateFormData, onNext, o
                         </label>
                         <input
                             type="text"
-                            name="postalCode"
                             value={formData.postalCode}
-                            onChange={handleChange}
-                            className="w-full px-4 py-2 border text-black border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                            onChange={(e) => updateFormData({ postalCode: e.target.value })}
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                            placeholder="Postal code"
                         />
                     </div>
+
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Country
+                            Country <span className="text-red-500">*</span>
                         </label>
-                        <select
-                            name="country"
+                        <input
+                            type="text"
                             value={formData.country}
-                            onChange={handleChange}
-                            className="w-full px-4 py-2 border text-black border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                        >
-                            <option value="">Select country</option>
-                            {countries.map((country) => (
-                                <option key={country} value={country}>{country}</option>
-                            ))}
-                        </select>
+                            onChange={(e) => updateFormData({ country: e.target.value })}
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                            placeholder="Country"
+                        />
+                        {errors.country && <p className="text-red-500 text-sm mt-1">{errors.country}</p>}
                     </div>
                 </div>
-            </div>
-            
-            {/* Personal Information */}
-            <div className="space-y-4">
-                <h3 className="text-lg font-medium text-gray-800">Personal Information</h3>
-                
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Birthdate
-                    </label>
-                    <input
-                        type="date"
-                        name="birthDate"
-                        value={formData.birthDate}
-                        onChange={handleChange}
-                        className="w-full px-4 py-2 border text-black border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                    />
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Birth Date
+                        </label>
+                        <input
+                            type="date"
+                            value={formData.birthDate}
+                            onChange={(e) => updateFormData({ birthDate: e.target.value })}
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                        />
+                    </div>
+
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                             Gender
                         </label>
                         <select
-                            name="gender"
                             value={formData.gender}
-                            onChange={handleChange}
-                            className="w-full px-4 py-2 border text-black border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                            onChange={(e) => updateFormData({ gender: e.target.value })}
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                         >
                             <option value="">Select gender</option>
                             <option value="male">Male</option>
@@ -199,38 +164,36 @@ export default function Step2SubmitterInfo({ formData, updateFormData, onNext, o
                             <option value="other">Other</option>
                         </select>
                     </div>
+
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                             Pronouns
                         </label>
                         <input
                             type="text"
-                            name="pronouns"
                             value={formData.pronouns}
-                            onChange={handleChange}
-                            className="w-full px-4 py-2 border text-black border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
-                            placeholder="e.g., he/him, she/her, they/them"
+                            onChange={(e) => updateFormData({ pronouns: e.target.value })}
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                            placeholder="e.g., He/Him, She/Her, They/Them"
                         />
                     </div>
                 </div>
             </div>
-            
-            {/* Navigation Buttons */}
-            <div className="flex justify-between pt-4">
+
+            <div className="flex justify-between pt-6">
                 <button
-                    type="button"
                     onClick={onPrev}
-                    className="px-6 py-2.5 border text-black border-gray-300 rounded-md font-semibold text-gray-700 hover:bg-gray-50 transition-all"
+                    className="px-6 py-2.5 border border-gray-300 rounded-lg font-semibold text-gray-700 hover:bg-gray-50 transition"
                 >
                     ← Previous
                 </button>
                 <button
-                    type="submit"
-                    className="bg-[#1EB97A] hover:bg-[#189663] text-white px-6 py-2.5 rounded-md font-semibold transition-all"
+                    onClick={handleNext}
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg font-semibold transition"
                 >
                     Next Step →
                 </button>
             </div>
-        </form>
+        </div>
     );
 }

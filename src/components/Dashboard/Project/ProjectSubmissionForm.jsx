@@ -80,35 +80,81 @@ export default function ProjectSubmissionForm() {
     };
 
     const handleSubmit = async (paymentIntentId) => {
-        setIsSubmitting(true);
-
+    setIsSubmitting(true);
+    
+    try {
+        // Get token from localStorage
+        const token = localStorage.getItem('token');
+        
+        if (!token) {
+            alert('Please login to submit your project');
+            router.push('/login');
+            return;
+        }
+        
+        // Prepare submission data
+        const submissionData = {
+            ...formData,
+            paymentIntentId,
+            submittedAt: new Date().toISOString(),
+            status: 'pending_review'
+        };
+        
+        console.log('Submitting data:', submissionData);
+        
+        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+        
+        // Try multiple possible endpoints
+        let response;
+        let error;
+        
+        // Try Next.js API route first
         try {
-            const submissionData = {
-                ...formData,
-                paymentIntentId,
-                submittedAt: new Date().toISOString(),
-            };
-
-            const response = await fetch("/api/projects", {
+            response = await fetch('/api/projects', {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
                 },
                 body: JSON.stringify(submissionData),
             });
-
+            
             if (!response.ok) {
-                throw new Error("Submission failed");
+                error = await response.json();
+                throw new Error(error.message || 'Submission failed');
             }
-
-            router.push("/dashboard?success=true");
-        } catch (error) {
-            console.error("Error submitting project:", error);
-            alert("There was an error submitting your project. Please try again.");
-        } finally {
-            setIsSubmitting(false);
+        } catch (err) {
+            console.log('Next.js API route failed, trying Express backend...');
+            
+            // Try Express backend
+            response = await fetch(`${API_URL}/api/projects/submit`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+                body: JSON.stringify(submissionData),
+            });
+            
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Submission failed');
+            }
         }
-    };
+        
+        const data = await response.json();
+        console.log('Submission response:', data);
+        
+        // Redirect to success page
+        router.push('/dashboard?success=true&projectId=' + data.data.id);
+        
+    } catch (error) {
+        console.error("Error submitting project:", error);
+        alert(error.message || "There was an error submitting your project. Please try again.");
+    } finally {
+        setIsSubmitting(false);
+    }
+};
 
     const renderStep = () => {
         switch (currentStep) {

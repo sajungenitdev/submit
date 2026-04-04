@@ -8,8 +8,31 @@ import AvatarDropdown from "./AvatarDropdown";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [userRole, setUserRole] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
   const menuRef = useRef(null);
   const pathname = usePathname(); // Detects current URL
+
+  // Get user role from localStorage
+  useEffect(() => {
+    const getUserRole = () => {
+      try {
+        const userStr = localStorage.getItem('user');
+        if (userStr) {
+          const userData = JSON.parse(userStr);
+          const role = userData.role || userData.userType || 'user';
+          setUserRole(role);
+        }
+      } catch (error) {
+        console.error('Error getting user role:', error);
+        setUserRole('user');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    getUserRole();
+  }, []);
 
   // Close menu when clicking outside
   useEffect(() => {
@@ -48,12 +71,79 @@ const Header = () => {
     setIsMenuOpen(!isMenuOpen);
   };
 
-  // Centralized Link Configuration
-  const navLinks = [
-    { name: "Dashboard", href: "/dashboard" },
-    { name: "My Projects", href: "/project" },
-    { name: "Submissions", href: "/submissions" },
-  ];
+  // Get dashboard URL based on user role
+  const getDashboardUrl = () => {
+    if (userRole === 'admin' || userRole === 'Administrator') {
+      return '/admin/dashboard';
+    }
+    return '/dashboard';
+  };
+
+  // Get projects URL based on user role
+  const getProjectsUrl = () => {
+    if (userRole === 'admin' || userRole === 'Administrator') {
+      return '/admin/projects';
+    }
+    return '/project';
+  };
+
+  // Get submissions URL based on user role
+  // const getSubmissionsUrl = () => {
+  //   if (userRole === 'admin' || userRole === 'Administrator') {
+  //     return '/admin/submissions';
+  //   }
+  //   return '/submissions';
+  // };
+
+  // Get users URL (admin only)
+  const getUsersUrl = () => {
+    return '/admin/all-users';
+  };
+
+  // Centralized Link Configuration based on role
+  const getNavLinks = () => {
+    const isAdmin = userRole === 'admin' || userRole === 'Administrator';
+    
+    if (isAdmin) {
+      return [
+        { name: "Dashboard", href: "/admin/dashboard" },
+        { name: "Users", href: "/admin/all-users" },
+        { name: "Submissions", href: "/admin/all-submissions" },
+      ];
+    }
+    
+    // Regular user links
+    return [
+      { name: "Dashboard", href: "/dashboard" },
+      { name: "My Projects", href: "/project" },
+      { name: "Submissions", href: "/submissions" },
+    ];
+  };
+
+  const navLinks = getNavLinks();
+
+  // Show loading state or minimal header while checking role
+  if (isLoading) {
+    return (
+      <header className="flex shadow-md py-4 px-4 sm:px-10 bg-white min-h-[70px] tracking-wide relative z-50">
+        <div className="flex flex-wrap items-center justify-between gap-5 w-full max-w-7xl mx-auto">
+          <Link href="/" className="max-sm:hidden" aria-label="Home">
+            <Image
+              src="/assets/logo-final.webp"
+              alt="Company Logo"
+              width={144}
+              height={36}
+              className="w-36"
+              priority
+            />
+          </Link>
+          <div className="flex items-center space-x-3">
+            <div className="w-8 h-8 bg-gray-200 rounded-full animate-pulse"></div>
+          </div>
+        </div>
+      </header>
+    );
+  }
 
   return (
     <header className="flex shadow-md py-4 px-4 sm:px-10 bg-white min-h-[70px] tracking-wide relative z-50">
@@ -112,11 +202,25 @@ const Header = () => {
             </button>
           </div>
 
+          {/* Admin Badge for Mobile */}
+          {(userRole === 'admin' || userRole === 'Administrator') && (
+            <div className="px-6 pt-4 pb-2 lg:hidden">
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                Admin Mode
+              </span>
+            </div>
+          )}
+
           {/* Navigation Links */}
           <ul className="lg:flex lg:gap-x-2 max-lg:p-6 max-lg:space-y-2">
             {navLinks.map((link) => {
               // Logic to check if link is active
-              const isActive = pathname === link.href;
+              const isActive = pathname === link.href || pathname?.startsWith(link.href + '/');
+              
+              // Special handling for admin dashboard
+              const isAdminDashboardActive = userRole === 'admin' && pathname === '/admin';
+              
+              const activeCheck = isActive || isAdminDashboardActive;
 
               return (
                 <li key={link.name}>
@@ -124,7 +228,7 @@ const Header = () => {
                     href={link.href}
                     className={`
                       block font-semibold text-[15px] py-2.5 px-4 rounded-lg transition-all
-                      ${isActive
+                      ${activeCheck
                         ? "text-blue-700 bg-blue-50/80 lg:bg-blue-50"
                         : "text-slate-700 hover:text-blue-700 hover:bg-gray-50"
                       }
@@ -137,10 +241,44 @@ const Header = () => {
               );
             })}
           </ul>
+
+          {/* Admin Quick Links for Mobile */}
+          {(userRole === 'admin' || userRole === 'Administrator') && (
+            <div className="border-t border-gray-100 mt-4 pt-4 px-6 lg:hidden">
+              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
+                Quick Admin Actions
+              </p>
+              <div className="space-y-2">
+                <Link
+                  href="/admin/all-users/create"
+                  className="block text-sm text-gray-600 hover:text-blue-600 py-1"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  + Create New User
+                </Link>
+                <Link
+                  href="/admin/festivals/create"
+                  className="block text-sm text-gray-600 hover:text-blue-600 py-1"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  + Add Festival
+                </Link>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Action Buttons */}
         <div className="flex items-center space-x-3">
+          {/* Admin Badge for Desktop */}
+          {(userRole === 'admin' || userRole === 'Administrator') && (
+            <div className="hidden lg:block">
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                Admin
+              </span>
+            </div>
+          )}
+          
           <AvatarDropdown />
 
           {/* Mobile Hamburger Toggle */}

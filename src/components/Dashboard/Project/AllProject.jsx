@@ -22,7 +22,7 @@ const AllProject = () => {
                     <h1 className="text-2xl font-bold text-gray-800">My Projects</h1>
                     <p className="text-sm text-gray-500">Manage your film submissions and project details</p>
                 </div>
-                <Link href="/project/drop-project" className="bg-[#1EB97A] hover:bg-[#189663] text-white px-6 py-2.5 rounded-md font-semibold flex items-center gap-2 transition-all shadow-sm w-fit">
+                <Link href="/projects/drop-project" className="bg-[#1EB97A] hover:bg-[#189663] text-white px-6 py-2.5 rounded-md font-semibold flex items-center gap-2 transition-all shadow-sm w-fit">
                     <span className="text-xl">+</span> Add New Project
                 </Link>
             </div>
