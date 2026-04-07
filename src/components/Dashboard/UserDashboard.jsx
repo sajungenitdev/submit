@@ -97,10 +97,10 @@ export default function AdminDashboard() {
         } catch (error) {
             console.error('Logout error:', error);
         } finally {
-            localStorage.removeItem('token');
-            localStorage.removeItem('user');
+            // Use clearAuthData to remove both localStorage and cookies
+            clearAuthData();
             console.log('Redirecting to login...');
-            router.push('/login');
+            window.location.href = '/login';
         }
     };
 
@@ -176,8 +176,8 @@ export default function AdminDashboard() {
                                         href={item.href}
                                         onClick={() => setActiveTab(item.id)}
                                         className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 group ${activeTab === item.id
-                                                ? 'bg-blue-50 text-blue-700 shadow-sm'
-                                                : 'text-gray-700 hover:bg-gray-50 hover:text-blue-600'
+                                            ? 'bg-blue-50 text-blue-700 shadow-sm'
+                                            : 'text-gray-700 hover:bg-gray-50 hover:text-blue-600'
                                             }`}
                                     >
                                         <span className="text-xl">{item.icon}</span>

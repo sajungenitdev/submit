@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import React, { useState, useEffect } from 'react';
+import { setAuthData, getToken, getUser, clearAuthData } from '@/utils/auth';
 
 const Login = () => {
     const router = useRouter();
@@ -16,30 +17,26 @@ const Login = () => {
     const [error, setError] = useState('');
     const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://film-server-qlxt.onrender.com';
     
-    // Check if user is already logged in - FIXED
+    // Check if user is already logged in
     useEffect(() => {
-        const token = localStorage.getItem('token');
-        const user = localStorage.getItem('user');
+        const token = getToken();
+        const user = getUser();
         
         if (token && user) {
             try {
-                const userData = JSON.parse(user);
-                // Use router.push instead of window.location.href
-                // Add a small delay to prevent race conditions
-                const redirectUrl = (userData.role === 'admin' || userData.role === 'Administrator') 
+                const redirectUrl = (user.role === 'admin' || user.role === 'Administrator') 
                     ? '/admin' 
                     : '/dashboard';
                 
-                // Use router.replace to avoid adding to history stack
-                router.replace(redirectUrl);
+                console.log('Already logged in, redirecting to:', redirectUrl);
+                // Use window.location for hard redirect to ensure middleware sees cookies
+                window.location.href = redirectUrl;
             } catch (error) {
-                console.error('Error parsing user data:', error);
-                // Clear invalid data
-                localStorage.removeItem('token');
-                localStorage.removeItem('user');
+                console.error('Error checking auth:', error);
+                clearAuthData();
             }
         }
-    }, [router]);
+    }, []);
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -47,17 +44,14 @@ const Login = () => {
             ...prev,
             [name]: type === 'checkbox' ? checked : value
         }));
-        // Clear error when user starts typing
         if (error) setError('');
     };
 
     const handleLogin = async (e) => {
         e.preventDefault();
         
-        // Prevent double submission
         if (isLoading) return;
         
-        // Basic validation
         if (!formData.email.trim()) {
             setError('Please enter your email address');
             return;
@@ -88,28 +82,22 @@ const Login = () => {
             console.log('Login response:', data);
 
             if (data.success) {
-                // Store the token and user data
-                localStorage.setItem('token', data.token);
-                localStorage.setItem('user', JSON.stringify(data.user));
-                
-                // If remember me is checked, set a flag
-                if (formData.rememberMe) {
-                    localStorage.setItem('rememberMe', 'true');
-                }
+                // Store auth data in both localStorage and cookies
+                setAuthData(data.token, data.user, formData.rememberMe);
                 
                 console.log('Login successful! User role:', data.user.role);
                 
-                // Determine redirect URL
                 const redirectUrl = (data.user.role === 'admin' || data.user.role === 'Administrator') 
                     ? '/admin' 
                     : '/dashboard';
                 
                 console.log('Redirecting to:', redirectUrl);
                 
-                // Use router.push for client-side navigation
-                // Add a small delay to ensure localStorage is fully written
+                // Small delay to ensure cookies are set before redirect
                 setTimeout(() => {
-                    router.push(redirectUrl);
+                    // Use window.location.href for hard navigation
+                    // This ensures middleware can read the cookies
+                    window.location.href = redirectUrl;
                 }, 100);
             } else {
                 setError(data.message || 'Login failed. Please check your credentials.');
@@ -126,7 +114,6 @@ const Login = () => {
         <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4 sm:px-6 lg:px-8">
             <div className="max-w-6xl w-full">
                 <div className="grid lg:grid-cols-2 items-center gap-8">
-                    {/* Login Form */}
                     <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md mx-auto w-full">
                         <div className="mb-8 text-center">
                             <h1 className="text-3xl font-bold text-gray-900">Welcome Back</h1>
@@ -135,7 +122,6 @@ const Login = () => {
                             </p>
                         </div>
 
-                        {/* Error Message */}
                         {error && (
                             <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-3">
                                 <div className="flex items-center gap-2">
@@ -148,7 +134,6 @@ const Login = () => {
                         )}
 
                         <form onSubmit={handleLogin} className="space-y-5">
-                            {/* Email Field */}
                             <div>
                                 <label className="text-gray-700 text-sm font-semibold mb-2 block">
                                     Email Address
@@ -171,7 +156,6 @@ const Login = () => {
                                 </div>
                             </div>
 
-                            {/* Password Field */}
                             <div>
                                 <label className="text-gray-700 text-sm font-semibold mb-2 block">
                                     Password
@@ -210,7 +194,6 @@ const Login = () => {
                                 </div>
                             </div>
 
-                            {/* Remember Me */}
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center">
                                     <input
@@ -227,7 +210,6 @@ const Login = () => {
                                 </div>
                             </div>
 
-                            {/* Submit Button */}
                             <button
                                 type="submit"
                                 disabled={isLoading}
@@ -246,7 +228,6 @@ const Login = () => {
                                 )}
                             </button>
 
-                            {/* Register Link */}
                             <p className="text-center text-sm text-gray-600 mt-4">
                                 Don't have an account?{' '}
                                 <Link href="/register" className="text-blue-600 font-semibold hover:underline">
@@ -256,7 +237,6 @@ const Login = () => {
                         </form>
                     </div>
 
-                    {/* Illustration */}
                     <div className="hidden lg:block">
                         <div className="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl p-8 text-center">
                             <svg className="w-24 h-24 mx-auto text-white mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
