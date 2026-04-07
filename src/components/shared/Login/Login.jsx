@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import React, { useState, useEffect } from 'react';
-import { setAuthData, getToken, getUser, clearAuthData } from '@/utils/auth';
+import { getToken, getUser, clearAuthData } from '@/utils/auth';
 
 const Login = () => {
     const router = useRouter();
@@ -29,14 +29,13 @@ const Login = () => {
                     : '/dashboard';
                 
                 console.log('Already logged in, redirecting to:', redirectUrl);
-                // Use window.location for hard redirect to ensure middleware sees cookies
-                window.location.href = redirectUrl;
+                router.replace(redirectUrl);
             } catch (error) {
                 console.error('Error checking auth:', error);
                 clearAuthData();
             }
         }
-    }, []);
+    }, [router]);
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -82,8 +81,13 @@ const Login = () => {
             console.log('Login response:', data);
 
             if (data.success) {
-                // Store auth data in both localStorage and cookies
-                setAuthData(data.token, data.user, formData.rememberMe);
+                // Store auth data in localStorage
+                localStorage.setItem('token', data.token);
+                localStorage.setItem('user', JSON.stringify(data.user));
+                
+                if (formData.rememberMe) {
+                    localStorage.setItem('rememberMe', 'true');
+                }
                 
                 console.log('Login successful! User role:', data.user.role);
                 
@@ -93,12 +97,8 @@ const Login = () => {
                 
                 console.log('Redirecting to:', redirectUrl);
                 
-                // Small delay to ensure cookies are set before redirect
-                setTimeout(() => {
-                    // Use window.location.href for hard navigation
-                    // This ensures middleware can read the cookies
-                    window.location.href = redirectUrl;
-                }, 100);
+                // Use router.push for navigation
+                router.push(redirectUrl);
             } else {
                 setError(data.message || 'Login failed. Please check your credentials.');
                 setIsLoading(false);

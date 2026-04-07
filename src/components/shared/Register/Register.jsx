@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import React, { useState, useEffect } from 'react';
+import { getToken } from '@/utils/auth';
 
 const Register = () => {
     const router = useRouter();
@@ -21,12 +22,11 @@ const Register = () => {
     const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://film-server-qlxt.onrender.com';
 
     useEffect(() => {
-        const token = localStorage.getItem('token');
+        const token = getToken();
         if (token) {
-            // Use window.location for reliable redirect
-            window.location.href = '/dashboard';
+            router.push('/dashboard');
         }
-    }, []);
+    }, [router]);
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -70,7 +70,6 @@ const Register = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         
-        // Prevent double submission
         if (isLoading) return;
         
         if (!validateForm()) {
@@ -105,10 +104,7 @@ const Register = () => {
                 
                 console.log('Registration successful! Redirecting to dashboard...');
                 
-                // Use window.location for reliable redirect
-                setTimeout(() => {
-                    window.location.href = '/dashboard';
-                }, 100);
+                router.push('/dashboard');
             } else {
                 setError(data.message || 'Registration failed. Please try again.');
                 setIsLoading(false);
@@ -141,7 +137,6 @@ const Register = () => {
                     )}
 
                     <form onSubmit={handleSubmit} className="space-y-5">
-                        {/* Name Field */}
                         <div>
                             <label className="text-slate-900 text-sm mb-2 block font-semibold">
                                 Full Name <span className="text-red-500">*</span>
@@ -164,7 +159,6 @@ const Register = () => {
                             </div>
                         </div>
 
-                        {/* Email Field */}
                         <div>
                             <label className="text-slate-900 text-sm mb-2 block font-semibold">
                                 Email Address <span className="text-red-500">*</span>
@@ -187,7 +181,6 @@ const Register = () => {
                             </div>
                         </div>
 
-                        {/* Password Field */}
                         <div>
                             <label className="text-slate-900 text-sm mb-2 block font-semibold">
                                 Password <span className="text-red-500">*</span>
@@ -227,7 +220,6 @@ const Register = () => {
                             <p className="text-xs text-gray-500 mt-1">Must be at least 6 characters</p>
                         </div>
 
-                        {/* Confirm Password Field */}
                         <div>
                             <label className="text-slate-900 text-sm mb-2 block font-semibold">
                                 Confirm Password <span className="text-red-500">*</span>
@@ -266,7 +258,6 @@ const Register = () => {
                             </div>
                         </div>
 
-                        {/* Terms and Conditions */}
                         <div className="flex items-start gap-3">
                             <input
                                 id="acceptTerms"

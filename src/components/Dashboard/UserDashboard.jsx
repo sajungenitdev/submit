@@ -3,83 +3,31 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { getToken } from '@/utils/auth';
+import { getToken, getUser, clearAuthData } from '@/utils/auth';
 
-export default function AdminDashboard() {
+export default function UserDashboard() {
     const router = useRouter();
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('overview');
-    const [stats, setStats] = useState({
-        totalUsers: 0,
-        totalProjects: 0,
-        activeUsers: 0
-    });
 
     useEffect(() => {
-        const checkAuth = async () => {
-            const token = getToken();
-            const userStr = localStorage.getItem('user');
+        const token = getToken();
+        const userData = getUser();
 
-            console.log('=== DEBUG INFO ===');
-            console.log('Token:', token);
-            console.log('User String:', userStr);
+        console.log('=== Dashboard Debug Info ===');
+        console.log('Token:', token ? 'Present' : 'Missing');
+        console.log('User Data:', userData);
 
-            if (!token || !userStr) {
-                console.log('No token or user found, redirecting to login');
-                router.push('/login');
-                return;
-            }
-
-            try {
-                const userData = JSON.parse(userStr);
-                console.log('Parsed User Data:', userData);
-                console.log('User Role:', userData.role);
-
-                // Set user data regardless of role
-                setUser(userData);
-
-                // Optional: Check role but don't redirect
-                if (userData.role !== 'admin' && userData.role !== 'Administrator') {
-                    console.log('Note: User is not admin (role: ' + userData.role + ')');
-                    // You can show a message but still allow access
-                }
-
-                // Fetch dashboard stats
-                await fetchDashboardStats(token);
-
-            } catch (error) {
-                console.error('Error parsing user data:', error);
-                router.push('/login');
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        checkAuth();
-    }, [router]);
-
-    const fetchDashboardStats = async (token) => {
-        try {
-            const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://film-server-qlxt.onrender.com';
-            console.log('Fetching stats from:', API_URL);
-
-            // Set demo stats for now
-            setStats({
-                totalUsers: 1247,
-                totalProjects: 342,
-                activeUsers: 89
-            });
-
-        } catch (error) {
-            console.error('Error fetching stats:', error);
-            setStats({
-                totalUsers: 1247,
-                totalProjects: 342,
-                activeUsers: 89
-            });
+        if (!token || !userData) {
+            console.log('No auth data, redirecting to login');
+            router.replace('/login');
+            return;
         }
-    };
+
+        setUser(userData);
+        setLoading(false);
+    }, [router]);
 
     const handleLogout = async () => {
         console.log('Logging out...');
@@ -97,15 +45,14 @@ export default function AdminDashboard() {
         } catch (error) {
             console.error('Logout error:', error);
         } finally {
-            // Use clearAuthData to remove both localStorage and cookies
             clearAuthData();
             console.log('Redirecting to login...');
-            window.location.href = '/login';
+            router.push('/login');
         }
     };
 
     const getInitials = (name) => {
-        if (!name) return 'A';
+        if (!name) return 'U';
         const parts = name.trim().split(' ');
         if (parts.length >= 2) {
             return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
@@ -115,7 +62,7 @@ export default function AdminDashboard() {
 
     const navigationItems = [
         { id: 'overview', name: 'Dashboard Overview', icon: '📊', href: '/dashboard' },
-        { id: 'projects', name: 'All Projects', icon: '🎬', href: '/projects' },
+        { id: 'projects', name: 'My Projects', icon: '🎬', href: '/projects' },
         { id: 'submissions', name: 'Submissions', icon: '📄', href: '/submissions' },
         { id: 'profile', name: 'Profile', icon: '⚙️', href: '/profile' }
     ];
@@ -131,20 +78,13 @@ export default function AdminDashboard() {
         );
     }
 
-    // Log the actual user data being used
-    console.log('=== RENDERING WITH USER DATA ===');
-    console.log('User being displayed:', user);
-
     return (
-        <div className="min-h-screen">
+        <div className="min-h-screen bg-gray-50">
             <div className="container mx-auto px-4 py-8">
-                {/* Grid Layout: 3 columns left sidebar, 9 columns content */}
                 <div className="grid grid-cols-12 gap-6">
-
-                    {/* Left Sidebar - 3 columns */}
+                    {/* Left Sidebar */}
                     <div className="col-span-12 md:col-span-3">
                         <div className="bg-white rounded-2xl shadow-sm overflow-hidden sticky top-8">
-
                             {/* Profile Section */}
                             <div className="bg-gradient-to-br from-blue-500 to-blue-700 p-6 text-center">
                                 <div className="relative inline-block">
@@ -157,10 +97,10 @@ export default function AdminDashboard() {
                                 </div>
 
                                 <h3 className="mt-4 text-white font-semibold text-lg">
-                                    {user?.name || 'User'} {/* Changed from 'Admin User' */}
+                                    {user?.name || 'User'}
                                 </h3>
                                 <p className="text-blue-100 text-sm mt-1">
-                                    {user?.email || 'user@example.com'} {/* Changed from admin email */}
+                                    {user?.email || 'user@example.com'}
                                 </p>
 
                                 <div className="mt-3 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-white/20 text-white">
@@ -176,8 +116,8 @@ export default function AdminDashboard() {
                                         href={item.href}
                                         onClick={() => setActiveTab(item.id)}
                                         className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 group ${activeTab === item.id
-                                            ? 'bg-blue-50 text-blue-700 shadow-sm'
-                                            : 'text-gray-700 hover:bg-gray-50 hover:text-blue-600'
+                                                ? 'bg-blue-50 text-blue-700 shadow-sm'
+                                                : 'text-gray-700 hover:bg-gray-50 hover:text-blue-600'
                                             }`}
                                     >
                                         <span className="text-xl">{item.icon}</span>
@@ -206,7 +146,7 @@ export default function AdminDashboard() {
                         </div>
                     </div>
 
-                    {/* Right Content - 9 columns */}
+                    {/* Right Content */}
                     <div className="col-span-12 md:col-span-9">
                         {/* Welcome Header */}
                         <div className="bg-white rounded-2xl shadow-sm p-6 mb-6">
@@ -224,7 +164,7 @@ export default function AdminDashboard() {
                             </div>
                         </div>
 
-                        {/* User Info Card - Shows actual user data */}
+                        {/* User Info Card */}
                         <div className="bg-white rounded-2xl shadow-sm overflow-hidden mb-6">
                             <div className="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50">
                                 <h2 className="text-lg font-semibold text-gray-900">
@@ -246,15 +186,6 @@ export default function AdminDashboard() {
                                         <p className="text-sm text-gray-900 mt-1">
                                             <span className="inline-flex px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
                                                 {user?.role || 'User'}
-                                            </span>
-                                        </p>
-                                    </div>
-                                    <div>
-                                        <label className="text-xs font-medium text-gray-500 uppercase">Status</label>
-                                        <p className="text-sm text-gray-900 mt-1">
-                                            <span className={`inline-flex px-2 py-1 rounded-full text-xs font-medium ${user?.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                                                }`}>
-                                                {user?.isActive ? 'Active' : 'Inactive'}
                                             </span>
                                         </p>
                                     </div>

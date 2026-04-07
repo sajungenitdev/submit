@@ -1,12 +1,10 @@
-import React from 'react';
+"use client";
+
 import UserDashboard from '@/components/Dashboard/UserDashboard';
+import { withAuth } from '@/components/withAuth';
 
-const page = () => {
-    return (
-        <div>
-            <UserDashboard />
-        </div>
-    );
-};
+function DashboardPage() {
+    return <UserDashboard />;
+}
 
-export default page;
+export default withAuth(DashboardPage);
