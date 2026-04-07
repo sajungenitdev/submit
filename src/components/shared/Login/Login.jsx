@@ -14,7 +14,6 @@ const Login = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
-    const [successMessage, setSuccessMessage] = useState('');
     const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://film-server-qlxt.onrender.com';
     
     // Check if user is already logged in
@@ -26,14 +25,16 @@ const Login = () => {
             try {
                 const userData = JSON.parse(user);
                 // Redirect based on role
-                if (userData.role === 'admin') {
-                    router.push('/admin/dashboard');
+                if (userData.role === 'admin' || userData.role === 'Administrator') {
+                    router.push('/admin');
                 } else {
                     router.push('/dashboard');
                 }
             } catch (error) {
                 console.error('Error parsing user data:', error);
-                router.push('/dashboard');
+                // Clear invalid data
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
             }
         }
     }, [router]);
@@ -50,12 +51,22 @@ const Login = () => {
 
     const handleLogin = async (e) => {
         e.preventDefault();
+        
+        // Basic validation
+        if (!formData.email.trim()) {
+            setError('Please enter your email address');
+            return;
+        }
+        if (!formData.password) {
+            setError('Please enter your password');
+            return;
+        }
+        
         setIsLoading(true);
         setError('');
 
         try {
             console.log('Sending login request to:', `${API_URL}/api/auth/login`);
-            console.log('Request body:', { email: formData.email, password: '***' });
             
             const response = await fetch(`${API_URL}/api/auth/login`, {
                 method: 'POST',
@@ -63,7 +74,7 @@ const Login = () => {
                     'Content-Type': 'application/json' 
                 },
                 body: JSON.stringify({
-                    email: formData.email,
+                    email: formData.email.trim().toLowerCase(),
                     password: formData.password
                 })
             });
@@ -83,105 +94,116 @@ const Login = () => {
                 
                 console.log('Login successful! User role:', data.user.role);
                 
-                // Redirect based on user role
-                if (data.user.role === 'admin') {
-                    console.log('Redirecting to admin dashboard...');
-                    router.push('/admin/dashboard');
-                } else {
-                    console.log('Redirecting to user dashboard...');
-                    router.push('/dashboard');
-                }
+                // Small delay to ensure storage is set
+                setTimeout(() => {
+                    // Redirect based on user role
+                    if (data.user.role === 'admin' || data.user.role === 'Administrator') {
+                        router.push('/admin');
+                    } else {
+                        router.push('/dashboard');
+                    }
+                }, 100);
             } else {
                 setError(data.message || 'Login failed. Please check your credentials.');
             }
         } catch (error) {
             console.error('Login error:', error);
-            setError('Network error. Please make sure the server is running.');
+            setError('Unable to connect to server. Please check your internet connection.');
         } finally {
             setIsLoading(false);
         }
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-white">
-            <div className="py-6 px-4">
-                <div className="grid lg:grid-cols-2 items-center gap-6 max-w-6xl w-full">
-                    <div className="border border-slate-300 rounded-lg p-6 max-w-md shadow-[0_2px_22px_-4px_rgba(93,96,127,0.2)] max-lg:mx-auto">
-                        <form onSubmit={handleLogin} className="space-y-6">
-                            <div className="mb-12">
-                                <h1 className="text-slate-900 text-3xl font-semibold">Sign in</h1>
-                                <p className="text-slate-600 text-[15px] mt-6 leading-relaxed">
-                                    Sign in to your account and explore a world of possibilities. Your journey begins here.
-                                </p>
-                            </div>
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4 sm:px-6 lg:px-8">
+            <div className="max-w-6xl w-full">
+                <div className="grid lg:grid-cols-2 items-center gap-8">
+                    {/* Login Form */}
+                    <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md mx-auto w-full">
+                        <div className="mb-8 text-center">
+                            <h1 className="text-3xl font-bold text-gray-900">Welcome Back</h1>
+                            <p className="text-gray-600 text-sm mt-2">
+                                Sign in to your account to continue
+                            </p>
+                        </div>
 
-                            {/* Error Message */}
-                            {error && (
-                                <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                        {/* Error Message */}
+                        {error && (
+                            <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-3 animate-shake">
+                                <div className="flex items-center gap-2">
+                                    <svg className="w-5 h-5 text-red-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
                                     <p className="text-red-600 text-sm">{error}</p>
                                 </div>
-                            )}
+                            </div>
+                        )}
 
-                            {/* Success Message */}
-                            {successMessage && (
-                                <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-                                    <p className="text-green-600 text-sm">{successMessage}</p>
-                                </div>
-                            )}
-
+                        <form onSubmit={handleLogin} className="space-y-5">
                             {/* Email Field */}
                             <div>
-                                <label className="text-slate-900 text-sm font-medium mb-2 block">
+                                <label className="text-gray-700 text-sm font-semibold mb-2 block">
                                     Email Address
                                 </label>
-                                <div className="relative flex items-center">
+                                <div className="relative">
                                     <input
                                         name="email"
                                         type="email"
                                         required
                                         value={formData.email}
                                         onChange={handleChange}
-                                        className="w-full text-sm text-slate-900 border border-slate-300 pl-4 pr-10 py-3 rounded-lg outline-blue-600 focus:ring-2 focus:ring-blue-500"
-                                        placeholder="Enter your email address"
+                                        className="w-full text-gray-900 text-sm border border-gray-300 pl-11 pr-4 py-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+                                        placeholder="Enter your email"
                                         disabled={isLoading}
+                                        autoComplete="email"
                                     />
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="#bbb" stroke="#bbb" className="w-[18px] h-[18px] absolute right-4" viewBox="0 0 24 24">
-                                        <circle cx="10" cy="7" r="6" data-original="#000000"></circle>
-                                        <path d="M14 15H6a5 5 0 0 0-5 5 3 3 0 0 0 3 3h12a3 3 0 0 0 3-3 5 5 0 0 0-5-5zm8-4h-2.59l.3-.29a1 1 0 0 0-1.42-1.42l-2 2a1 1 0 0 0 0 1.42l2 2a1 1 0 0 0 1.42 0 1 1 0 0 0 0-1.42l-.3-.29H22a1 1 0 0 0 0-2z" data-original="#000000"></path>
+                                    <svg className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                                     </svg>
                                 </div>
                             </div>
 
                             {/* Password Field */}
                             <div>
-                                <label className="text-slate-900 text-sm font-medium mb-2 block">
+                                <label className="text-gray-700 text-sm font-semibold mb-2 block">
                                     Password
                                 </label>
-                                <div className="relative flex items-center">
+                                <div className="relative">
                                     <input
                                         name="password"
                                         type={showPassword ? "text" : "password"}
                                         required
                                         value={formData.password}
                                         onChange={handleChange}
-                                        className="w-full text-sm text-slate-900 border border-slate-300 pl-4 pr-10 py-3 rounded-lg outline-blue-600 focus:ring-2 focus:ring-blue-500"
-                                        placeholder="Enter password"
+                                        className="w-full text-gray-900 text-sm border border-gray-300 pl-11 pr-11 py-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
+                                        placeholder="Enter your password"
                                         disabled={isLoading}
+                                        autoComplete="current-password"
                                     />
+                                    <svg className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                    </svg>
                                     <button
                                         type="button"
                                         onClick={() => setShowPassword(!showPassword)}
-                                        className="absolute right-4 focus:outline-none"
+                                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none"
                                     >
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="#bbb" stroke="#bbb" className="w-[18px] h-[18px]" viewBox="0 0 128 128">
-                                            <path d="M64 104C22.127 104 1.367 67.496.504 65.943a4 4 0 0 1 0-3.887C1.367 60.504 22.127 24 64 24s62.633 36.504 63.496 38.057a4 4 0 0 1 0 3.887C126.633 67.496 105.873 104 64 104zM8.707 63.994C13.465 71.205 32.146 96 64 96c31.955 0 50.553-24.775 55.293-31.994C114.535 56.795 95.854 32 64 32 32.045 32 13.447 56.775 8.707 63.994zM64 88c-13.234 0-24-10.766-24-24s10.766-24 24-24 24 10.766 24 24-10.766 24-24 24zm0-40c-8.822 0-16 7.178-16 16s7.178 16 16 16 16-7.178 16-16-7.178-16-16-16z" data-original="#000000"></path>
-                                        </svg>
+                                        {showPassword ? (
+                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                                            </svg>
+                                        ) : (
+                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                            </svg>
+                                        )}
                                     </button>
                                 </div>
                             </div>
 
-                            {/* Remember Me & Forgot Password */}
-                            <div className="flex flex-wrap items-center justify-between gap-4">
+                            {/* Remember Me */}
+                            <div className="flex items-center justify-between">
                                 <div className="flex items-center">
                                     <input
                                         id="remember-me"
@@ -189,55 +211,75 @@ const Login = () => {
                                         type="checkbox"
                                         checked={formData.rememberMe}
                                         onChange={handleChange}
-                                        className="h-4 w-4 shrink-0 text-blue-600 focus:ring-blue-500 border-slate-300 rounded"
+                                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                                     />
-                                    <label className="ml-3 block text-sm text-slate-900">
+                                    <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">
                                         Remember me
                                     </label>
                                 </div>
-                                <div className="text-sm">
-                                    <Link href="/forgot-password" className="text-blue-600 hover:underline font-medium">
-                                        Forgot your password?
-                                    </Link>
-                                </div>
+                                {/* Forgot password link removed to avoid 404 */}
                             </div>
 
                             {/* Submit Button */}
-                            <div className="!mt-12">
-                                <button
-                                    type="submit"
-                                    disabled={isLoading}
-                                    className="w-full shadow-xl py-2.5 px-4 text-[15px] font-medium tracking-wide rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                                >
-                                    {isLoading ? (
-                                        <span className="flex items-center justify-center gap-2">
-                                            <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                                            </svg>
-                                            Signing in...
-                                        </span>
-                                    ) : (
-                                        'Sign in'
-                                    )}
-                                </button>
+                            <button
+                                type="submit"
+                                disabled={isLoading}
+                                className="w-full py-3 px-4 text-sm font-semibold rounded-lg text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md mt-6"
+                            >
+                                {isLoading ? (
+                                    <span className="flex items-center justify-center gap-2">
+                                        <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
+                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                        </svg>
+                                        Signing in...
+                                    </span>
+                                ) : (
+                                    'Sign In'
+                                )}
+                            </button>
 
-                                <p className="text-sm !mt-6 text-center text-slate-600">
-                                    Don't have an account?
-                                    <Link href="/register" className="text-blue-600 font-medium hover:underline ml-1 whitespace-nowrap">
-                                        Register here
-                                    </Link>
-                                </p>
-                            </div>
+                            {/* Register Link */}
+                            <p className="text-center text-sm text-gray-600 mt-4">
+                                Don't have an account?{' '}
+                                <Link href="/register" className="text-blue-600 font-semibold hover:underline">
+                                    Create an account
+                                </Link>
+                            </p>
                         </form>
                     </div>
 
-                    <div className="max-lg:mt-8">
-                        <img
-                            src="https://readymadeui.com/login-image.webp"
-                            className="w-full aspect-[71/50] max-lg:w-4/5 mx-auto block object-cover"
-                            alt="login illustration"
-                        />
+                    {/* Illustration */}
+                    <div className="hidden lg:block">
+                        <div className="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl p-8 text-center">
+                            <svg className="w-24 h-24 mx-auto text-white mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a5 5 0 0110 0v1H3v-1z" />
+                            </svg>
+                            <h2 className="text-2xl font-bold text-white mb-4">Welcome to Film Festival</h2>
+                            <p className="text-blue-100">
+                                Sign in to submit your films, track submissions, and connect with festivals worldwide.
+                            </p>
+                            <div className="mt-6 space-y-2">
+                                <div className="flex items-center gap-2 text-blue-100 text-sm">
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                    </svg>
+                                    <span>Submit your films easily</span>
+                                </div>
+                                <div className="flex items-center gap-2 text-blue-100 text-sm">
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                    </svg>
+                                    <span>Track submission status</span>
+                                </div>
+                                <div className="flex items-center gap-2 text-blue-100 text-sm">
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                    </svg>
+                                    <span>Get notified about festivals</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
