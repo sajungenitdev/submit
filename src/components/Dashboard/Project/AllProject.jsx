@@ -19,7 +19,7 @@ const AllProject = () => {
     const [viewModalOpen, setViewModalOpen] = useState(false);
     const [selectedProject, setSelectedProject] = useState(null);
     
-    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://film-server-qlxt.onrender.com';
 
     useEffect(() => {
         fetchProjects();

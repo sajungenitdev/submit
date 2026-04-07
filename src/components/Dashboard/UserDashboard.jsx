@@ -61,7 +61,7 @@ export default function AdminDashboard() {
 
     const fetchDashboardStats = async (token) => {
         try {
-            const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+            const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://film-server-qlxt.onrender.com';
             console.log('Fetching stats from:', API_URL);
 
             // Set demo stats for now
@@ -86,7 +86,7 @@ export default function AdminDashboard() {
         try {
             const token = getToken();
             if (token) {
-                await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/auth/logout`, {
+                await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://film-server-qlxt.onrender.com'}/api/auth/logout`, {
                     method: 'POST',
                     headers: {
                         Authorization: `Bearer ${token}`,
