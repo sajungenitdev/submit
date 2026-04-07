@@ -23,6 +23,40 @@ export default function Step4Specifications({ formData, updateFormData, onNext, 
 
     const aspectRatios = ["16:9", "4:3", "2.35:1", "1.85:1", "1.33:1", "Other"];
 
+    // Language options with ISO codes
+    const languageOptions = [
+        { code: "en", name: "English" },
+        { code: "es", name: "Spanish" },
+        { code: "fr", name: "French" },
+        { code: "de", name: "German" },
+        { code: "it", name: "Italian" },
+        { code: "pt", name: "Portuguese" },
+        { code: "zh", name: "Chinese" },
+        { code: "ja", name: "Japanese" },
+        { code: "ko", name: "Korean" },
+        { code: "hi", name: "Hindi" },
+        { code: "bn", name: "Bengali" },
+        { code: "ar", name: "Arabic" },
+        { code: "ru", name: "Russian" },
+        { code: "tr", name: "Turkish" },
+        { code: "nl", name: "Dutch" },
+        { code: "pl", name: "Polish" },
+        { code: "sv", name: "Swedish" },
+        { code: "da", name: "Danish" },
+        { code: "no", name: "Norwegian" },
+        { code: "fi", name: "Finnish" },
+        { code: "el", name: "Greek" },
+        { code: "cs", name: "Czech" },
+        { code: "hu", name: "Hungarian" },
+        { code: "ro", name: "Romanian" },
+        { code: "vi", name: "Vietnamese" },
+        { code: "th", name: "Thai" },
+        { code: "id", name: "Indonesian" },
+        { code: "ms", name: "Malay" },
+        { code: "he", name: "Hebrew" },
+        { code: "other", name: "Other" }
+    ];
+
     const handleProjectTypeToggle = (type) => {
         const current = [...formData.projectTypes];
         if (current.includes(type)) {
@@ -32,6 +66,10 @@ export default function Step4Specifications({ formData, updateFormData, onNext, 
             current.push(type);
         }
         updateFormData({ projectTypes: current });
+        // Clear error for this field if exists
+        if (errors.projectTypes) {
+            setErrors({ ...errors, projectTypes: null });
+        }
     };
 
     const handleRuntimeChange = (field, value) => {
@@ -40,6 +78,31 @@ export default function Step4Specifications({ formData, updateFormData, onNext, 
         if (field === 'runtimeMinutes' && (parseInt(value) > 59 || parseInt(value) < 0)) return;
         if (field === 'runtimeSeconds' && (parseInt(value) > 59 || parseInt(value) < 0)) return;
         updateFormData({ [field]: value.padStart(2, '0') });
+    };
+
+    const validateForm = () => {
+        const newErrors = {};
+
+        if (!formData.projectTypes || formData.projectTypes.length === 0) {
+            newErrors.projectTypes = "Please select at least one project type";
+        }
+
+        if (!formData.genres) {
+            newErrors.genres = "Please select a genre";
+        }
+
+        if (!formData.language) {
+            newErrors.language = "Please select a language";
+        }
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
+
+    const handleNext = () => {
+        if (validateForm()) {
+            onNext();
+        }
     };
 
     return (
@@ -68,6 +131,9 @@ export default function Step4Specifications({ formData, updateFormData, onNext, 
                             </label>
                         ))}
                     </div>
+                    {errors.projectTypes && (
+                        <p className="text-red-500 text-sm mt-1">{errors.projectTypes}</p>
+                    )}
                 </div>
 
                 {/* Genres */}
@@ -77,14 +143,21 @@ export default function Step4Specifications({ formData, updateFormData, onNext, 
                     </label>
                     <select
                         value={formData.genres}
-                        onChange={(e) => updateFormData({ genres: e.target.value })}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                        onChange={(e) => {
+                            updateFormData({ genres: e.target.value });
+                            if (errors.genres) setErrors({ ...errors, genres: null });
+                        }}
+                        className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 ${errors.genres ? 'border-red-500' : 'border-gray-300'
+                            }`}
                     >
                         <option value="">Select primary genre</option>
                         {genreOptions.map((genre) => (
                             <option key={genre} value={genre}>{genre}</option>
                         ))}
                     </select>
+                    {errors.genres && (
+                        <p className="text-red-500 text-sm mt-1">{errors.genres}</p>
+                    )}
                 </div>
 
                 {/* Runtime */}
@@ -191,17 +264,33 @@ export default function Step4Specifications({ formData, updateFormData, onNext, 
                         />
                     </div>
 
+                    {/* Primary Language - Changed to dropdown */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Primary Language
+                            Primary Language <span className="text-red-500">*</span>
                         </label>
-                        <input
-                            type="text"
+                        <select
                             value={formData.language}
-                            onChange={(e) => updateFormData({ language: e.target.value })}
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                            placeholder="e.g., English, French, Spanish"
-                        />
+                            onChange={(e) => {
+                                updateFormData({ language: e.target.value });
+                                if (errors.language) setErrors({ ...errors, language: null });
+                            }}
+                            className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 ${errors.language ? 'border-red-500' : 'border-gray-300'
+                                }`}
+                        >
+                            <option value="">Select primary language</option>
+                            {languageOptions.map((lang) => (
+                                <option key={lang.code} value={lang.code}>
+                                    {lang.name}
+                                </option>
+                            ))}
+                        </select>
+                        {errors.language && (
+                            <p className="text-red-500 text-sm mt-1">{errors.language}</p>
+                        )}
+                        <p className="text-xs text-gray-500 mt-1">
+                            Select the primary language of your film
+                        </p>
                     </div>
 
                     <div>
@@ -288,7 +377,7 @@ export default function Step4Specifications({ formData, updateFormData, onNext, 
                     ← Previous
                 </button>
                 <button
-                    onClick={onNext}
+                    onClick={handleNext}
                     className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg font-semibold transition"
                 >
                     Next Step →

@@ -41,7 +41,7 @@ export default function Step2SubmitterInfo({ formData, updateFormData, onNext, o
                             type="email"
                             value={formData.email}
                             onChange={(e) => updateFormData({ email: e.target.value })}
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                            className="text-black w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                             placeholder="you@example.com"
                         />
                         {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
@@ -55,7 +55,7 @@ export default function Step2SubmitterInfo({ formData, updateFormData, onNext, o
                             type="tel"
                             value={formData.phone}
                             onChange={(e) => updateFormData({ phone: e.target.value })}
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                            className="text-black w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                             placeholder="+1 234 567 8900"
                         />
                         {errors.phone && <p className="text-red-500 text-sm mt-1">{errors.phone}</p>}
@@ -70,7 +70,7 @@ export default function Step2SubmitterInfo({ formData, updateFormData, onNext, o
                         type="text"
                         value={formData.address}
                         onChange={(e) => updateFormData({ address: e.target.value })}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                        className="text-black w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                         placeholder="Street address"
                     />
                     {errors.address && <p className="text-red-500 text-sm mt-1">{errors.address}</p>}
@@ -85,7 +85,7 @@ export default function Step2SubmitterInfo({ formData, updateFormData, onNext, o
                             type="text"
                             value={formData.city}
                             onChange={(e) => updateFormData({ city: e.target.value })}
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                            className="text-black w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                             placeholder="City"
                         />
                         {errors.city && <p className="text-red-500 text-sm mt-1">{errors.city}</p>}
@@ -99,7 +99,7 @@ export default function Step2SubmitterInfo({ formData, updateFormData, onNext, o
                             type="text"
                             value={formData.stateProvince}
                             onChange={(e) => updateFormData({ stateProvince: e.target.value })}
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                            className="text-black w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                             placeholder="State/Province"
                         />
                     </div>
@@ -114,7 +114,7 @@ export default function Step2SubmitterInfo({ formData, updateFormData, onNext, o
                             type="text"
                             value={formData.postalCode}
                             onChange={(e) => updateFormData({ postalCode: e.target.value })}
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                            className="text-black w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                             placeholder="Postal code"
                         />
                     </div>
@@ -127,7 +127,7 @@ export default function Step2SubmitterInfo({ formData, updateFormData, onNext, o
                             type="text"
                             value={formData.country}
                             onChange={(e) => updateFormData({ country: e.target.value })}
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                            className="text-black w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                             placeholder="Country"
                         />
                         {errors.country && <p className="text-red-500 text-sm mt-1">{errors.country}</p>}
@@ -143,7 +143,7 @@ export default function Step2SubmitterInfo({ formData, updateFormData, onNext, o
                             type="date"
                             value={formData.birthDate}
                             onChange={(e) => updateFormData({ birthDate: e.target.value })}
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                            className="text-black w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                         />
                     </div>
 
@@ -154,7 +154,7 @@ export default function Step2SubmitterInfo({ formData, updateFormData, onNext, o
                         <select
                             value={formData.gender}
                             onChange={(e) => updateFormData({ gender: e.target.value })}
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                            className="text-black w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                         >
                             <option value="">Select gender</option>
                             <option value="male">Male</option>
@@ -173,7 +173,7 @@ export default function Step2SubmitterInfo({ formData, updateFormData, onNext, o
                             type="text"
                             value={formData.pronouns}
                             onChange={(e) => updateFormData({ pronouns: e.target.value })}
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                            className="text-black w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                             placeholder="e.g., He/Him, She/Her, They/Them"
                         />
                     </div>

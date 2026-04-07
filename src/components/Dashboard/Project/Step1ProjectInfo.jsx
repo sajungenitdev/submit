@@ -39,7 +39,7 @@ export default function Step1ProjectInfo({ formData, updateFormData, onNext }) {
                     <select
                         value={formData.projectType}
                         onChange={(e) => updateFormData({ projectType: e.target.value })}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        className="w-full px-4 text-black py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     >
                         <option value="">Select project type</option>
                         <option value="short_film">Short Film</option>
@@ -65,7 +65,7 @@ export default function Step1ProjectInfo({ formData, updateFormData, onNext }) {
                         type="text"
                         value={formData.projectTitle}
                         onChange={(e) => updateFormData({ projectTitle: e.target.value })}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        className="text-black w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         placeholder="Enter project title"
                     />
                     {errors.projectTitle && (
@@ -82,7 +82,7 @@ export default function Step1ProjectInfo({ formData, updateFormData, onNext }) {
                         value={formData.briefSynopsis}
                         onChange={(e) => updateFormData({ briefSynopsis: e.target.value })}
                         rows={5}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        className="text-black w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         placeholder="Provide a brief synopsis of your project (50-500 characters)"
                     />
                     <div className="flex justify-between mt-1">
@@ -119,7 +119,7 @@ export default function Step1ProjectInfo({ formData, updateFormData, onNext }) {
                                 type="text"
                                 value={formData.nonEnglishTitle}
                                 onChange={(e) => updateFormData({ nonEnglishTitle: e.target.value })}
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                className="text-black w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                                 placeholder="Enter original title"
                             />
                         </div>
@@ -131,7 +131,7 @@ export default function Step1ProjectInfo({ formData, updateFormData, onNext }) {
                                 value={formData.nonEnglishSynopsis}
                                 onChange={(e) => updateFormData({ nonEnglishSynopsis: e.target.value })}
                                 rows={3}
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                className="text-black w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                                 placeholder="Enter original synopsis"
                             />
                         </div>
@@ -150,7 +150,7 @@ export default function Step1ProjectInfo({ formData, updateFormData, onNext }) {
                                 type="url"
                                 value={formData.website}
                                 onChange={(e) => updateFormData({ website: e.target.value })}
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                className="text-black w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                                 placeholder="https://"
                             />
                         </div>
@@ -162,7 +162,7 @@ export default function Step1ProjectInfo({ formData, updateFormData, onNext }) {
                                 type="text"
                                 value={formData.twitter}
                                 onChange={(e) => updateFormData({ twitter: e.target.value })}
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                className="text-black w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                                 placeholder="@username"
                             />
                         </div>
@@ -174,7 +174,7 @@ export default function Step1ProjectInfo({ formData, updateFormData, onNext }) {
                                 type="url"
                                 value={formData.facebook}
                                 onChange={(e) => updateFormData({ facebook: e.target.value })}
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                className="text-black w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                                 placeholder="Facebook URL"
                             />
                         </div>
@@ -186,7 +186,7 @@ export default function Step1ProjectInfo({ formData, updateFormData, onNext }) {
                                 type="text"
                                 value={formData.instagram}
                                 onChange={(e) => updateFormData({ instagram: e.target.value })}
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                className="text-black w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                                 placeholder="@username"
                             />
                         </div>

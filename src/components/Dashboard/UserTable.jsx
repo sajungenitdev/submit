@@ -40,7 +40,7 @@ const UserTable = () => {
                 throw new Error("No authentication token found. Please login again.");
             }
 
-            const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+            const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://film-server-qlxt.onrender.com';
             const response = await fetch(`${API_URL}/api/users`, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -98,7 +98,7 @@ const UserTable = () => {
                 throw new Error("No authentication token found. Please login again.");
             }
 
-            const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+            const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://film-server-qlxt.onrender.com';
 
             const response = await fetch(`${API_URL}/api/users/${userId}`, {
                 method: "DELETE",

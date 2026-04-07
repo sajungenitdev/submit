@@ -7,47 +7,25 @@ import React, { useState, useEffect } from 'react';
 const Register = () => {
     const router = useRouter();
     const [formData, setFormData] = useState({
-        name: 'John Doe',           // Demo data
-        email: 'john@example.com',   // Demo data
-        password: 'password123',     // Demo data
-        confirmPassword: 'password123', // Demo data
-        acceptTerms: true            // Demo data
+        name: '',
+        email: '',
+        password: '',
+        confirmPassword: '',
+        acceptTerms: false
     });
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
-    const [successMessage, setSuccessMessage] = useState('');
-    const [useDemo, setUseDemo] = useState(true); // Auto-fill demo data
-    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+    
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://film-server-qlxt.onrender.com';
+
     useEffect(() => {
         const token = localStorage.getItem('token');
         if (token) {
             router.push('/dashboard');
         }
     }, [router]);
-
-    // Fill with demo data
-    const fillDemoData = () => {
-        setFormData({
-            name: 'John Doe',
-            email: 'john@example.com',
-            password: 'password123',
-            confirmPassword: 'password123',
-            acceptTerms: true
-        });
-    };
-
-    // Fill with another demo user
-    const fillAlternateDemo = () => {
-        setFormData({
-            name: 'Jane Smith',
-            email: 'jane@example.com',
-            password: 'password456',
-            confirmPassword: 'password456',
-            acceptTerms: true
-        });
-    };
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -56,7 +34,6 @@ const Register = () => {
             [name]: type === 'checkbox' ? checked : value
         }));
         if (error) setError('');
-        if (useDemo) setUseDemo(false);
     };
 
     const validateForm = () => {
@@ -89,17 +66,25 @@ const Register = () => {
         return true;
     };
 
-    // Register.jsx
     const handleSubmit = async (e) => {
-        e.preventDefault();
+        e.preventDefault(); // This prevents GET submission
+        
+        if (!validateForm()) {
+            return;
+        }
+
+        setIsLoading(true);
+        setError('');
 
         try {
             const response = await fetch(`${API_URL}/api/auth/register`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                method: 'POST', // Explicit POST method
+                headers: { 
+                    'Content-Type': 'application/json'
+                },
                 body: JSON.stringify({
-                    name: formData.name,
-                    email: formData.email,
+                    name: formData.name.trim(),
+                    email: formData.email.toLowerCase().trim(),
                     password: formData.password
                 })
             });
@@ -107,50 +92,33 @@ const Register = () => {
             const data = await response.json();
 
             if (data.success) {
-                // Store the REAL token from backend
                 localStorage.setItem('token', data.token);
                 localStorage.setItem('user', JSON.stringify(data.user));
-
-                // Redirect to dashboard
                 router.push('/dashboard');
             } else {
-                setError(data.message);
+                setError(data.message || 'Registration failed. Please try again.');
             }
         } catch (error) {
             console.error('Registration error:', error);
-            setError('Registration failed');
+            setError('Network error. Please check your connection and try again.');
+        } finally {
+            setIsLoading(false);
         }
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center p-6 bg-white">
-            <div className="grid lg:grid-cols-2 items-center gap-8 max-w-6xl max-lg:max-w-lg w-full">
-                <form onSubmit={handleSubmit} className="lg:max-w-md w-full">
-                    <h1 className="text-slate-900 text-3xl font-semibold mb-8">Create an account</h1>
-
-                    {/* Demo Data Buttons */}
-                    <div className="mb-6 flex gap-3">
-                        <button
-                            type="button"
-                            onClick={fillDemoData}
-                            className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded transition"
-                        >
-                            📝 Fill Demo Data
-                        </button>
-                        <button
-                            type="button"
-                            onClick={fillAlternateDemo}
-                            className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded transition"
-                        >
-                            👤 Alternate User
-                        </button>
+        <div className="min-h-screen flex items-center justify-center p-6 bg-gradient-to-br from-blue-50 to-indigo-50">
+            <div className="grid lg:grid-cols-2 items-center gap-8 max-w-6xl max-lg:max-w-lg w-full bg-white rounded-2xl shadow-xl overflow-hidden">
+                <div className="p-8 lg:p-12">
+                    <div className="mb-8">
+                        <h1 className="text-slate-900 text-3xl font-bold mb-2">Create an account</h1>
+                        <p className="text-slate-600">Join us today and get started</p>
                     </div>
 
-                    {/* Error Message */}
                     {error && (
-                        <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-3">
+                        <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
                             <div className="flex items-center gap-2">
-                                <svg className="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg className="w-5 h-5 text-red-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
                                 <p className="text-red-600 text-sm">{error}</p>
@@ -158,56 +126,57 @@ const Register = () => {
                         </div>
                     )}
 
-                    {/* Success Message */}
-                    {successMessage && (
-                        <div className="mb-6 bg-green-50 border border-green-200 rounded-lg p-3">
-                            <div className="flex items-center gap-2">
-                                <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                                <p className="text-green-600 text-sm">{successMessage}</p>
-                            </div>
-                        </div>
-                    )}
-
-                    <div className="space-y-5">
+                    {/* IMPORTANT: No method attribute needed, handleSubmit handles it */}
+                    <form onSubmit={handleSubmit} className="space-y-5">
                         {/* Name Field */}
                         <div>
-                            <label className="text-slate-900 text-sm mb-2 block font-medium">
+                            <label className="text-slate-900 text-sm mb-2 block font-semibold">
                                 Full Name <span className="text-red-500">*</span>
                             </label>
-                            <input
-                                name="name"
-                                type="text"
-                                required
-                                value={formData.name}
-                                onChange={handleChange}
-                                className="bg-gray-50 w-full text-slate-900 text-sm px-4 py-3 focus:bg-transparent border border-gray-200 focus:border-blue-500 outline-none transition-all rounded-lg"
-                                placeholder="Enter your full name"
-                                disabled={isLoading}
-                            />
+                            <div className="relative">
+                                <input
+                                    name="name"
+                                    type="text"
+                                    required
+                                    autoComplete="name"
+                                    value={formData.name}
+                                    onChange={handleChange}
+                                    className="bg-gray-50 w-full text-slate-900 text-sm px-4 py-3 pl-11 focus:bg-transparent border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all rounded-lg"
+                                    placeholder="John Doe"
+                                    disabled={isLoading}
+                                />
+                                <svg className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                </svg>
+                            </div>
                         </div>
 
                         {/* Email Field */}
                         <div>
-                            <label className="text-slate-900 text-sm mb-2 block font-medium">
+                            <label className="text-slate-900 text-sm mb-2 block font-semibold">
                                 Email Address <span className="text-red-500">*</span>
                             </label>
-                            <input
-                                name="email"
-                                type="email"
-                                required
-                                value={formData.email}
-                                onChange={handleChange}
-                                className="bg-gray-50 w-full text-slate-900 text-sm px-4 py-3 focus:bg-transparent border border-gray-200 focus:border-blue-500 outline-none transition-all rounded-lg"
-                                placeholder="Enter your email"
-                                disabled={isLoading}
-                            />
+                            <div className="relative">
+                                <input
+                                    name="email"
+                                    type="email"
+                                    required
+                                    autoComplete="email"
+                                    value={formData.email}
+                                    onChange={handleChange}
+                                    className="bg-gray-50 w-full text-slate-900 text-sm px-4 py-3 pl-11 focus:bg-transparent border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all rounded-lg"
+                                    placeholder="you@example.com"
+                                    disabled={isLoading}
+                                />
+                                <svg className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                </svg>
+                            </div>
                         </div>
 
-                        {/* Password Field */}
+                        {/* Password Field - Fixed autocomplete */}
                         <div>
-                            <label className="text-slate-900 text-sm mb-2 block font-medium">
+                            <label className="text-slate-900 text-sm mb-2 block font-semibold">
                                 Password <span className="text-red-500">*</span>
                             </label>
                             <div className="relative">
@@ -215,12 +184,16 @@ const Register = () => {
                                     name="password"
                                     type={showPassword ? "text" : "password"}
                                     required
+                                    autoComplete="new-password"  // Fixed: Added autocomplete
                                     value={formData.password}
                                     onChange={handleChange}
-                                    className="bg-gray-50 w-full text-slate-900 text-sm px-4 py-3 pr-12 focus:bg-transparent border border-gray-200 focus:border-blue-500 outline-none transition-all rounded-lg"
+                                    className="bg-gray-50 w-full text-slate-900 text-sm px-4 py-3 pl-11 pr-12 focus:bg-transparent border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all rounded-lg"
                                     placeholder="Create a password (min. 6 characters)"
                                     disabled={isLoading}
                                 />
+                                <svg className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                </svg>
                                 <button
                                     type="button"
                                     onClick={() => setShowPassword(!showPassword)}
@@ -238,12 +211,12 @@ const Register = () => {
                                     )}
                                 </button>
                             </div>
-                            <p className="text-xs text-gray-500 mt-1">Password must be at least 6 characters</p>
+                            <p className="text-xs text-gray-500 mt-1">Must be at least 6 characters</p>
                         </div>
 
-                        {/* Confirm Password Field */}
+                        {/* Confirm Password Field - Fixed autocomplete */}
                         <div>
-                            <label className="text-slate-900 text-sm mb-2 block font-medium">
+                            <label className="text-slate-900 text-sm mb-2 block font-semibold">
                                 Confirm Password <span className="text-red-500">*</span>
                             </label>
                             <div className="relative">
@@ -251,12 +224,16 @@ const Register = () => {
                                     name="confirmPassword"
                                     type={showConfirmPassword ? "text" : "password"}
                                     required
+                                    autoComplete="new-password"  // Fixed: Added autocomplete
                                     value={formData.confirmPassword}
                                     onChange={handleChange}
-                                    className="bg-gray-50 w-full text-slate-900 text-sm px-4 py-3 pr-12 focus:bg-transparent border border-gray-200 focus:border-blue-500 outline-none transition-all rounded-lg"
+                                    className="bg-gray-50 w-full text-slate-900 text-sm px-4 py-3 pl-11 pr-12 focus:bg-transparent border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all rounded-lg"
                                     placeholder="Confirm your password"
                                     disabled={isLoading}
                                 />
+                                <svg className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                                </svg>
                                 <button
                                     type="button"
                                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
@@ -277,19 +254,19 @@ const Register = () => {
                         </div>
 
                         {/* Terms and Conditions */}
-                        <div className="flex items-start gap-2">
+                        <div className="flex items-start gap-3">
                             <input
                                 id="acceptTerms"
                                 name="acceptTerms"
                                 type="checkbox"
                                 checked={formData.acceptTerms}
                                 onChange={handleChange}
-                                className="h-4 w-4 shrink-0 border-gray-300 rounded mt-0.5 text-blue-600 focus:ring-blue-500"
+                                className="h-4 w-4 shrink-0 border-gray-300 rounded mt-0.5 text-blue-600 focus:ring-blue-500 focus:ring-2"
                             />
                             <label htmlFor="acceptTerms" className="text-sm text-slate-600">
-                                I accept the{' '}
+                                I agree to the{' '}
                                 <Link href="/terms" className="text-blue-600 font-semibold hover:underline">
-                                    Terms and Conditions
+                                    Terms of Service
                                 </Link>
                                 {' '}and{' '}
                                 <Link href="/privacy" className="text-blue-600 font-semibold hover:underline">
@@ -297,13 +274,11 @@ const Register = () => {
                                 </Link>
                             </label>
                         </div>
-                    </div>
 
-                    <div className="mt-8">
                         <button
                             type="submit"
                             disabled={isLoading}
-                            className="w-full py-3 px-6 text-sm font-medium tracking-wide text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="w-full py-3.5 px-6 text-sm font-semibold tracking-wide text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg"
                         >
                             {isLoading ? (
                                 <span className="flex items-center justify-center gap-2">
@@ -314,25 +289,51 @@ const Register = () => {
                                     Creating Account...
                                 </span>
                             ) : (
-                                'Sign Up'
+                                'Create Account'
                             )}
                         </button>
+
+                        <p className="text-center text-sm text-slate-600 pt-4">
+                            Already have an account?{' '}
+                            <Link href="/login" className="text-blue-600 font-semibold hover:underline">
+                                Sign in
+                            </Link>
+                        </p>
+                    </form>
+                </div>
+
+                <div className="hidden lg:block bg-gradient-to-br from-blue-600 to-indigo-700 p-12">
+                    <div className="h-full flex flex-col justify-center text-white">
+                        <div className="mb-8">
+                            <svg className="w-16 h-16 mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a5 5 0 0110 0v1H3v-1z" />
+                            </svg>
+                        </div>
+                        <h2 className="text-3xl font-bold mb-4">Join Our Community</h2>
+                        <p className="text-blue-100 mb-6 text-lg">
+                            Create an account to access exclusive features, manage your profile, and connect with others.
+                        </p>
+                        <div className="space-y-3">
+                            <div className="flex items-center gap-3 text-blue-100">
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                </svg>
+                                <span>Secure authentication</span>
+                            </div>
+                            <div className="flex items-center gap-3 text-blue-100">
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                </svg>
+                                <span>Personalized dashboard</span>
+                            </div>
+                            <div className="flex items-center gap-3 text-blue-100">
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                </svg>
+                                <span>24/7 support</span>
+                            </div>
+                        </div>
                     </div>
-
-                    <p className="text-sm text-slate-600 mt-6 text-center">
-                        Already have an account?{' '}
-                        <Link href="/login" className="text-blue-600 font-semibold hover:underline ml-1">
-                            Login here
-                        </Link>
-                    </p>
-                </form>
-
-                <div className="h-full">
-                    <img
-                        src="https://readymadeui.com/login-image.webp"
-                        className="w-full h-full object-contain aspect-[628/516]"
-                        alt="Registration illustration"
-                    />
                 </div>
             </div>
         </div>

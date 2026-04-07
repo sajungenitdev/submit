@@ -115,7 +115,7 @@ const Header = () => {
     // Regular user links
     return [
       { name: "Dashboard", href: "/dashboard" },
-      { name: "My Projects", href: "/project" },
+      { name: "My Projects", href: "/projects" },
       { name: "Submissions", href: "/submissions" },
     ];
   };

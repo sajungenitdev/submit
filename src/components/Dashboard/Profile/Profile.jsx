@@ -98,7 +98,7 @@ const Profile = () => {
                 return;
             }
 
-            const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+            const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://film-server-qlxt.onrender.com';
             const response = await fetch(`${API_URL}/api/users/profile`, {
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -287,7 +287,7 @@ const Profile = () => {
                 return;
             }
 
-            const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+            const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://film-server-qlxt.onrender.com';
 
             // Prepare data for API - Make sure all fields are properly structured
             const submitData = {

@@ -55,7 +55,7 @@ export default function ProjectSubmissionForm() {
         productionBudget: "",
         countryOfOrigin: "",
         countryOfFilming: "",
-        language: "",
+        language: "en", // Default to English
         shootingFormat: "",
         aspectRatio: "16:9",
         filmColor: "Color",
@@ -72,6 +72,19 @@ export default function ProjectSubmissionForm() {
     };
 
     const nextStep = () => {
+        // Validate required fields before proceeding
+        if (currentStep === 1) {
+            if (!formData.projectType || !formData.projectTitle || !formData.briefSynopsis) {
+                alert("Please fill in all required fields in Project Information");
+                return;
+            }
+        }
+        if (currentStep === 2) {
+            if (!formData.email || !formData.country) {
+                alert("Please fill in all required fields in Submitter Information");
+                return;
+            }
+        }
         setCurrentStep((prev) => Math.min(prev + 1, 6));
     };
 
@@ -79,82 +92,174 @@ export default function ProjectSubmissionForm() {
         setCurrentStep((prev) => Math.max(prev - 1, 1));
     };
 
-    const handleSubmit = async (paymentIntentId) => {
-    setIsSubmitting(true);
-    
-    try {
-        // Get token from localStorage
-        const token = localStorage.getItem('token');
+    // Helper function to validate and fix language code
+    const getValidLanguageCode = (language) => {
+        if (!language) return "en";
         
-        if (!token) {
-            alert('Please login to submit your project');
-            router.push('/login');
-            return;
-        }
-        
-        // Prepare submission data
-        const submissionData = {
-            ...formData,
-            paymentIntentId,
-            submittedAt: new Date().toISOString(),
-            status: 'pending_review'
+        // Map common language names to ISO codes
+        const languageMap = {
+            'english': 'en',
+            'spanish': 'es',
+            'french': 'fr',
+            'german': 'de',
+            'italian': 'it',
+            'portuguese': 'pt',
+            'chinese': 'zh',
+            'japanese': 'ja',
+            'korean': 'ko',
+            'hindi': 'hi',
+            'bengali': 'bn',
+            'arabic': 'ar',
+            'russian': 'ru',
+            'turkish': 'tr',
+            'dutch': 'nl',
+            'polish': 'pl',
+            'swedish': 'sv',
+            'danish': 'da',
+            'finnish': 'fi',
+            'norwegian': 'no',
+            'greek': 'el',
+            'czech': 'cs',
+            'hungarian': 'hu',
+            'romanian': 'ro',
+            'vietnamese': 'vi',
+            'thai': 'th',
+            'indonesian': 'id',
+            'malay': 'ms',
+            'hebrew': 'he',
+            'arabic': 'ar'
         };
         
-        console.log('Submitting data:', submissionData);
+        const lowerLang = language.toLowerCase().trim();
         
-        const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
-        
-        // Try multiple possible endpoints
-        let response;
-        let error;
-        
-        // Try Next.js API route first
-        try {
-            response = await fetch('/api/projects', {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${token}`
-                },
-                body: JSON.stringify(submissionData),
-            });
-            
-            if (!response.ok) {
-                error = await response.json();
-                throw new Error(error.message || 'Submission failed');
-            }
-        } catch (err) {
-            console.log('Next.js API route failed, trying Express backend...');
-            
-            // Try Express backend
-            response = await fetch(`${API_URL}/api/projects/submit`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${token}`
-                },
-                body: JSON.stringify(submissionData),
-            });
-            
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || 'Submission failed');
-            }
+        // If it's already a valid ISO code (2 chars)
+        if (lowerLang.length === 2 && /^[a-z]{2}$/.test(lowerLang)) {
+            return lowerLang;
         }
         
-        const data = await response.json();
-        console.log('Submission response:', data);
+        // Try to map from language name
+        if (languageMap[lowerLang]) {
+            return languageMap[lowerLang];
+        }
         
-        // Redirect to success page
-        router.push('/dashboard?success=true&projectId=' + data.data.id);
+        // Default to English
+        console.warn(`Unrecognized language: ${language}, defaulting to 'en'`);
+        return "en";
+    };
+
+    const handleSubmit = async (paymentIntentId) => {
+        setIsSubmitting(true);
         
-    } catch (error) {
-        console.error("Error submitting project:", error);
-        alert(error.message || "There was an error submitting your project. Please try again.");
-    } finally {
-        setIsSubmitting(false);
-    }
-};
+        try {
+            // Get token from localStorage
+            const token = localStorage.getItem('token');
+            
+            if (!token) {
+                alert('Please login to submit your project');
+                router.push('/login');
+                return;
+            }
+            
+            // Fix the language field before submission
+            const fixedLanguage = getValidLanguageCode(formData.language);
+            
+            // Prepare submission data with fixed language
+            const submissionData = {
+                ...formData,
+                language: fixedLanguage, // Use the fixed language code
+                paymentIntentId,
+                submittedAt: new Date().toISOString(),
+                status: 'pending_review'
+            };
+            
+            console.log('Submitting data:', submissionData);
+            
+            const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://film-server-qlxt.onrender.com';
+            
+            // Try Express backend directly (skip Next.js API route)
+            let response;
+            let lastError;
+            
+            // Option 1: Try the submit endpoint
+            try {
+                console.log('Trying Express backend: /api/projects/submit');
+                response = await fetch(`${API_URL}/api/projects/submit`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`
+                    },
+                    body: JSON.stringify(submissionData),
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('Submission successful:', data);
+                    
+                    // Redirect to success page
+                    router.push(`/dashboard?success=true&projectId=${data.data.id}`);
+                    return;
+                } else {
+                    const errorData = await response.json();
+                    lastError = errorData;
+                    console.log('Submit endpoint failed:', errorData);
+                }
+            } catch (err) {
+                console.log('Submit endpoint error:', err);
+                lastError = err;
+            }
+            
+            // Option 2: Try the create project endpoint
+            try {
+                console.log('Trying Express backend: /api/projects');
+                response = await fetch(`${API_URL}/api/projects`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`
+                    },
+                    body: JSON.stringify(submissionData),
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('Submission successful:', data);
+                    
+                    // Redirect to success page
+                    router.push(`/dashboard?success=true&projectId=${data.data.id}`);
+                    return;
+                } else {
+                    const errorData = await response.json();
+                    lastError = errorData;
+                    console.log('Create project endpoint failed:', errorData);
+                }
+            } catch (err) {
+                console.log('Create project endpoint error:', err);
+                lastError = err;
+            }
+            
+            // If we get here, both endpoints failed
+            throw new Error(lastError?.message || lastError?.error || 'Failed to submit project. Please try again.');
+            
+        } catch (error) {
+            console.error("Error submitting project:", error);
+            
+            // Show more detailed error message
+            let errorMessage = error.message || "There was an error submitting your project. Please try again.";
+            
+            if (errorMessage.includes('language')) {
+                errorMessage = "Invalid language selected. Please go back to Specifications and select a valid language.";
+            } else if (errorMessage.includes('token') || errorMessage.includes('auth')) {
+                errorMessage = "Your session has expired. Please login again.";
+                router.push('/login');
+                return;
+            }
+            
+            alert(errorMessage);
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
 
     const renderStep = () => {
         switch (currentStep) {

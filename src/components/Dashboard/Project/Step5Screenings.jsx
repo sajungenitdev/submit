@@ -115,40 +115,40 @@ export default function Step5Screenings({ formData, updateFormData, onNext, onPr
                                 placeholder="Festival Name"
                                 value={newScreening.festivalName}
                                 onChange={(e) => setNewScreening({ ...newScreening, festivalName: e.target.value })}
-                                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                className="text-black px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                             />
                             <input
                                 type="date"
                                 placeholder="Date"
                                 value={newScreening.date}
                                 onChange={(e) => setNewScreening({ ...newScreening, date: e.target.value })}
-                                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                className="text-black px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                             />
                             <input
                                 type="text"
                                 placeholder="Venue"
                                 value={newScreening.venue}
                                 onChange={(e) => setNewScreening({ ...newScreening, venue: e.target.value })}
-                                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                className="text-black px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                             />
                             <input
                                 type="text"
                                 placeholder="City"
                                 value={newScreening.city}
                                 onChange={(e) => setNewScreening({ ...newScreening, city: e.target.value })}
-                                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                className="text-black px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                             />
                             <input
                                 type="text"
                                 placeholder="Country"
                                 value={newScreening.country}
                                 onChange={(e) => setNewScreening({ ...newScreening, country: e.target.value })}
-                                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                className="text-black px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                             />
                             <select
                                 value={newScreening.status}
                                 onChange={(e) => setNewScreening({ ...newScreening, status: e.target.value })}
-                                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                className="text-black px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                             >
                                 <option value="pending">Pending</option>
                                 <option value="selected">Selected</option>
@@ -204,35 +204,35 @@ export default function Step5Screenings({ formData, updateFormData, onNext, onPr
                                 placeholder="Company Name"
                                 value={newDistributor.company}
                                 onChange={(e) => setNewDistributor({ ...newDistributor, company: e.target.value })}
-                                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                className="text-black px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                             />
                             <input
                                 type="text"
                                 placeholder="Contact Name"
                                 value={newDistributor.contactName}
                                 onChange={(e) => setNewDistributor({ ...newDistributor, contactName: e.target.value })}
-                                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                className="text-black px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                             />
                             <input
                                 type="email"
                                 placeholder="Email"
                                 value={newDistributor.email}
                                 onChange={(e) => setNewDistributor({ ...newDistributor, email: e.target.value })}
-                                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                className="text-black px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                             />
                             <input
                                 type="tel"
                                 placeholder="Phone"
                                 value={newDistributor.phone}
                                 onChange={(e) => setNewDistributor({ ...newDistributor, phone: e.target.value })}
-                                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                className="text-black px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                             />
                             <input
                                 type="text"
                                 placeholder="Territory (e.g., North America, Worldwide)"
                                 value={newDistributor.territory}
                                 onChange={(e) => setNewDistributor({ ...newDistributor, territory: e.target.value })}
-                                className="md:col-span-2 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                className="md:col-span-2 text-black px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                             />
                         </div>
                         <button

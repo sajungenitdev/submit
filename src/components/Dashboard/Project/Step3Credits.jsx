@@ -1,27 +1,31 @@
 "use client";
 
 import { Plus, Trash2 } from "lucide-react";
+import { useCallback, memo } from "react";
 
-export default function Step3Credits({ formData, updateFormData, onNext, onPrev }) {
-    const addPerson = (category, newPerson) => {
+// Move PersonForm outside as a separate component
+const PersonForm = memo(({ category, title, fields, persons, updateFormData }) => {
+    const addPerson = useCallback(() => {
+        const newPerson = {};
+        fields.forEach(field => { newPerson[field.name] = ""; });
         updateFormData({
-            [category]: [...formData[category], newPerson]
+            [category]: [...persons, newPerson]
         });
-    };
+    }, [category, fields, persons, updateFormData]);
 
-    const removePerson = (category, index) => {
-        const updated = [...formData[category]];
+    const removePerson = useCallback((index) => {
+        const updated = [...persons];
         updated.splice(index, 1);
         updateFormData({ [category]: updated });
-    };
+    }, [category, persons, updateFormData]);
 
-    const updatePerson = (category, index, field, value) => {
-        const updated = [...formData[category]];
-        updated[index][field] = value;
+    const updatePerson = useCallback((index, field, value) => {
+        const updated = [...persons];
+        updated[index] = { ...updated[index], [field]: value };
         updateFormData({ [category]: updated });
-    };
+    }, [category, persons, updateFormData]);
 
-    const PersonForm = ({ category, title, fields, persons }) => (
+    return (
         <div className="border-b border-gray-200 pb-6 mb-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">{title}</h3>
             {persons.map((person, index) => (
@@ -30,7 +34,7 @@ export default function Step3Credits({ formData, updateFormData, onNext, onPrev 
                         <h4 className="font-medium text-gray-700">Person {index + 1}</h4>
                         <button
                             type="button"
-                            onClick={() => removePerson(category, index)}
+                            onClick={() => removePerson(index)}
                             className="text-red-500 hover:text-red-700"
                         >
                             <Trash2 className="w-4 h-4" />
@@ -45,17 +49,17 @@ export default function Step3Credits({ formData, updateFormData, onNext, onPrev 
                                 {field.type === "textarea" ? (
                                     <textarea
                                         value={person[field.name] || ""}
-                                        onChange={(e) => updatePerson(category, index, field.name, e.target.value)}
+                                        onChange={(e) => updatePerson(index, field.name, e.target.value)}
                                         rows={2}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                        className="text-black w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
                                         placeholder={field.placeholder}
                                     />
                                 ) : (
                                     <input
                                         type={field.type || "text"}
                                         value={person[field.name] || ""}
-                                        onChange={(e) => updatePerson(category, index, field.name, e.target.value)}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                        onChange={(e) => updatePerson(index, field.name, e.target.value)}
+                                        className="text-black w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
                                         placeholder={field.placeholder}
                                     />
                                 )}
@@ -66,11 +70,7 @@ export default function Step3Credits({ formData, updateFormData, onNext, onPrev 
             ))}
             <button
                 type="button"
-                onClick={() => {
-                    const newPerson = {};
-                    fields.forEach(field => { newPerson[field.name] = ""; });
-                    addPerson(category, newPerson);
-                }}
+                onClick={addPerson}
                 className="flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium"
             >
                 <Plus className="w-4 h-4" />
@@ -78,7 +78,11 @@ export default function Step3Credits({ formData, updateFormData, onNext, onPrev 
             </button>
         </div>
     );
+});
 
+PersonForm.displayName = 'PersonForm';
+
+export default function Step3Credits({ formData, updateFormData, onNext, onPrev }) {
     const directorFields = [
         { name: "firstName", label: "First Name", placeholder: "First name" },
         { name: "middleName", label: "Middle Name", placeholder: "Middle name" },
@@ -119,28 +123,32 @@ export default function Step3Credits({ formData, updateFormData, onNext, onPrev 
                 category="directors"
                 title="Directors"
                 fields={directorFields}
-                persons={formData.directors}
+                persons={formData.directors || []}
+                updateFormData={updateFormData}
             />
 
             <PersonForm
                 category="writers"
                 title="Writers"
                 fields={writerFields}
-                persons={formData.writers}
+                persons={formData.writers || []}
+                updateFormData={updateFormData}
             />
 
             <PersonForm
                 category="producers"
                 title="Producers"
                 fields={producerFields}
-                persons={formData.producers}
+                persons={formData.producers || []}
+                updateFormData={updateFormData}
             />
 
             <PersonForm
                 category="keyCast"
                 title="Key Cast"
                 fields={castFields}
-                persons={formData.keyCast}
+                persons={formData.keyCast || []}
+                updateFormData={updateFormData}
             />
 
             <div className="flex justify-between pt-6">
